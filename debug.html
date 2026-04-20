@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NestWorks Debug</title>
+  <style>
+    body { font-family: monospace; padding: 24px; background: #f8fafc; font-size: 13px; }
+    .box { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .ok  { color: #16a34a; font-weight: bold; }
+    .err { color: #dc2626; font-weight: bold; }
+    .inf { color: #2563eb; }
+    .warn{ color: #d97706; font-weight: bold; }
+    pre  { white-space: pre-wrap; word-break: break-all; font-size: 11px; margin-top: 6px; background: #f1f5f9; padding: 10px; border-radius: 6px; }
+    button { padding: 8px 18px; background: #6366f1; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 8px; }
+    input  { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 12px; margin-top: 4px; box-sizing: border-box; }
+    label  { font-size: 12px; color: #64748b; display:block; margin-top:10px; }
+    .row   { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <b>NestWorks — Supabase Debug v2</b><br><br>
+  <label>Supabase Project URL (no trailing slash)</label>
+  <input id="url"  placeholder="https://abcdefghijklmn.supabase.co">
+  <label>Supabase Anon Key</label>
+  <input id="anon" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+  <br><br>
+  <button onclick="runTests()">▶ Run Tests</button>
+  <button onclick="out.innerHTML=''" style="background:#64748b">Clear</button>
+</div>
+<div class="box" id="out">
+  <span style="color:#94a3b8">Results will appear here…</span>
+</div>
+
+<script>
+const out = document.getElementById('out');
+function log(msg, cls='inf') {
+  out.insertAdjacentHTML('beforeend',
+    `<div class="row"><span class="${cls}">${msg}</span></div>`);
+}
+function logpre(label, val) {
+  out.insertAdjacentHTML('beforeend',
+    `<div class="row"><span style="color:#64748b">${label}:</span><pre>${typeof val==='string'?val:JSON.stringify(val,null,2)}</pre></div>`);
+}
+
+async function runTests() {
+  out.innerHTML = '';
+  const URL  = document.getElementById('url').value.trim().replace(/\/$/,'');
+  const ANON = document.getElementById('anon').value.trim();
+  if (!URL || !ANON) { log('Fill in both fields first','err'); return; }
+
+  // Decode JWT to check role
+  log('━━━ TEST 0: Decode your key ━━━');
+  try {
+    const parts = ANON.split('.');
+    if (parts.length !== 3) { log('✗ Not a valid JWT — check you copied the full key','err'); return; }
+    const payload = JSON.parse(atob(parts[1]));
+    logpre('Key payload', payload);
+    if (payload.role === 'anon') {
+      log('✓ This is the correct ANON key (role = anon)', 'ok');
+    } else if (payload.role === 'service_role') {
+      log('✗ This is the SERVICE ROLE key — use the anon key instead', 'err');
+      log('→ Go to Supabase → Settings → API → copy the anon/public key', 'err');
+      return;
+    } else {
+      log('⚠ Unexpected role: ' + payload.role, 'warn');
+    }
+  } catch(e) {
+    log('✗ Could not decode key: ' + e.message, 'err');
+    return;
+  }
+
+  // Test plans endpoint directly
+  log('━━━ TEST 1: Read plans table ━━━');
+  try {
+    const r = await fetch(URL + '/rest/v1/plans?select=id,name,duration_days,max_devices', {
+      headers: {
+        'apikey':        ANON,
+        'Authorization': 'Bearer ' + ANON,
+        'Accept':        'application/json'
+      }
+    });
+    const raw = await r.text();
+    log('HTTP Status: ' + r.status + ' ' + r.statusText, r.ok ? 'ok' : 'err');
+    try {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          log('⚠ Plans table returned 0 rows — RLS is blocking or table is empty', 'warn');
+          log('→ Run fix_plans_rls.sql in Supabase SQL Editor now', 'err');
+        } else {
+          log('✓ Plans loaded successfully — ' + data.length + ' plans found', 'ok');
+          logpre('Plans', data);
+        }
+      } else {
+        log('✗ Unexpected response format', 'err');
+        logpre('Raw response', raw);
+      }
+    } catch(e) {
+      log('✗ Could not parse response', 'err');
+      logpre('Raw response', raw);
+    }
+  } catch(e) {
+    log('✗ Fetch error: ' + e.message, 'err');
+  }
+
+  // Test with active filter
+  log('━━━ TEST 2: Read active plans only ━━━');
+  try {
+    const r = await fetch(URL + '/rest/v1/plans?select=id,name&is_active=eq.true&order=sort_order', {
+      headers: {
+        'apikey':        ANON,
+        'Authorization': 'Bearer ' + ANON,
+        'Accept':        'application/json'
+      }
+    });
+    const data = await r.json();
+    log('HTTP Status: ' + r.status, r.ok ? 'ok' : 'err');
+    if (Array.isArray(data) && data.length > 0) {
+      log('✓ Active plans: ' + data.map(p=>p.name).join(', '), 'ok');
+    } else {
+      logpre('Response', data);
+    }
+  } catch(e) {
+    log('✗ ' + e.message, 'err');
+  }
+
+  // Check RLS policies via pg_policies view
+  log('━━━ TEST 3: Check RLS policy exists ━━━');
+  try {
+    const r = await fetch(URL + '/rest/v1/rpc/get_plans_policies', {
+      method: 'POST',
+      headers: {
+        'apikey':        ANON,
+        'Authorization': 'Bearer ' + ANON,
+        'Content-Type':  'application/json'
+      },
+      body: '{}'
+    });
+    const data = await r.json();
+    logpre('RPC response', data);
+  } catch(e) {
+    log('RPC not available — skip', 'inf');
+  }
+
+  log('━━━ Tests complete ━━━', 'ok');
+}
+</script>
+</body>
+</html>
