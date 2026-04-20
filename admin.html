@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>NestWorks — Admin Panel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f0f2f7;--sf:#fff;--sf2:#f7f8fb;
+      --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.13);
+      --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
+      --acc:#6366f1;--al:rgba(99,102,241,.10);--ab:rgba(99,102,241,.26);
+      --grn:#10b981;--gl:rgba(16,185,129,.10);
+      --red:#ef4444;--rl:rgba(239,68,68,.09);
+      --amb:#f59e0b;--aml:rgba(245,158,11,.10);
+      --sans:'Instrument Sans',system-ui,sans-serif;
+      --mono:'JetBrains Mono',monospace;
+      --sw:220px;--th:52px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:var(--sans);font-size:13px;color:var(--tx);background:var(--bg);}
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:3px;}
+
+    /* Login */
+    #ls{position:fixed;inset:0;z-index:999;background:var(--bg);
+      background-image:radial-gradient(ellipse 600px 400px at -5% -5%,#dbeafe 0%,transparent 60%),
+        radial-gradient(ellipse 500px 400px at 105% -5%,#fce7f3 0%,transparent 60%),
+        radial-gradient(ellipse 600px 400px at 50% 110%,#d1fae5 0%,transparent 60%);
+      display:flex;align-items:center;justify-content:center;}
+    .lcard{width:380px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px) saturate(1.5);
+      border:1px solid rgba(255,255,255,.85);border-radius:22px;padding:32px 30px 28px;
+      box-shadow:0 20px 60px rgba(100,120,190,.14),inset 0 1px 0 rgba(255,255,255,.9);}
+    .llogo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
+    .lgem{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);
+      display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;
+      box-shadow:0 4px 14px rgba(99,102,241,.35);}
+    .lsub{text-align:center;font-size:12px;color:var(--tx3);margin-bottom:24px;}
+    .llbl{font-size:11px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px;}
+    .lg{margin-bottom:14px;}
+    .linp{width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--bd2);font-size:13px;
+      font-family:var(--sans);color:var(--tx);background:rgba(255,255,255,.8);outline:none;
+      transition:border-color .12s,box-shadow .12s;}
+    .linp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--al);}
+    .linp::placeholder{color:var(--tx3);}
+    .lbtn{width:100%;padding:10px;border-radius:9999px;border:none;cursor:pointer;font-size:13px;
+      font-weight:700;font-family:var(--sans);color:#fff;
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      box-shadow:0 4px 14px rgba(99,102,241,.30);transition:all .13s;
+      display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+    .lbtn:hover:not(:disabled){box-shadow:0 6px 20px rgba(99,102,241,.40);transform:translateY(-1px);}
+    .lbtn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .lerr{display:none;background:var(--rl);border:1px solid rgba(239,68,68,.2);border-radius:8px;
+      padding:9px 12px;font-size:12px;color:#b91c1c;margin-bottom:12px;line-height:1.5;}
+    .lerr.show{display:block;}
+    .lspin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* App shell */
+    .app{display:flex;flex-direction:column;height:100%;}
+    .top{height:var(--th);background:var(--sf);border-bottom:1px solid var(--bd);
+      display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:30;}
+    .gem{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);
+      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+    .lname{font-size:13px;font-weight:700;color:var(--tx);}
+    .ltag{font-size:9px;font-weight:600;color:var(--acc);letter-spacing:.7px;text-transform:uppercase;}
+    .tdiv{width:1px;height:18px;background:var(--bd);}
+    .ttit{font-size:12px;font-weight:600;color:var(--tx2);}
+    .tsp{flex:1;}
+    .awho{font-size:11px;color:var(--tx3);}
+    .abadge{padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:700;background:var(--al);color:var(--acc);border:1px solid var(--ab);}
+    .body{display:flex;flex:1;overflow:hidden;}
+
+    /* Sidebar */
+    .sidebar{width:var(--sw);flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);
+      display:flex;flex-direction:column;padding:14px 0;overflow-y:auto;}
+    .ssec{font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+      color:var(--tx3);padding:0 16px;margin:12px 0 6px;}
+    .si{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:12.5px;font-weight:500;
+      color:var(--tx2);cursor:pointer;transition:background .12s;border-left:2px solid transparent;}
+    .si:hover{background:var(--sf2);}
+    .si.on{color:var(--acc);background:var(--al);border-left-color:var(--acc);font-weight:600;}
+    .sico{font-size:15px;flex-shrink:0;}
+    .sbot{margin-top:auto;padding:12px 16px;}
+    .sobt{width:100%;padding:7px;border-radius:7px;font-size:12px;font-weight:600;font-family:var(--sans);
+      color:var(--tx2);background:var(--sf2);border:1px solid var(--bd);cursor:pointer;transition:all .12s;}
+    .sobt:hover{background:var(--rl);color:var(--red);border-color:rgba(239,68,68,.2);}
+
+    /* Main */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .view{display:none;flex:1;overflow-y:auto;padding:24px;flex-direction:column;}
+    .view.on{display:flex;}
+
+    /* Page header */
+    .phd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+    .ptit{font-size:18px;font-weight:700;color:var(--tx);}
+    .psub{font-size:12px;color:var(--tx3);margin-top:2px;}
+
+    /* Stat cards */
+    .sgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;}
+    @media(max-width:1100px){.sgrid{grid-template-columns:repeat(3,1fr);}}
+    .sc{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;}
+    .sn{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px;}
+    .sn.ca{color:var(--acc);}.sn.cg{color:var(--grn);}.sn.cr{color:var(--red);}.sn.cam{color:var(--amb);}.sn.ct{color:var(--tx2);}
+    .sl{font-size:11px;color:var(--tx3);font-weight:500;}
+
+    /* Card */
+    .card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+    .chd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--bd);}
+    .ctit{font-size:13px;font-weight:700;color:var(--tx);}
+
+    /* Table */
+    .tbl{width:100%;border-collapse:collapse;font-size:12px;}
+    .tbl th{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--tx3);
+      padding:9px 14px;border-bottom:1px solid var(--bd);background:var(--sf2);text-align:left;white-space:nowrap;}
+    .tbl td{padding:10px 14px;border-bottom:1px solid var(--bd);vertical-align:middle;color:var(--tx2);}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl tr:hover td{background:var(--sf2);}
+    .tbl td strong{color:var(--tx);font-weight:600;}
+    .tbl td code{font-family:var(--mono);font-size:11px;color:var(--acc);background:var(--al);padding:1px 6px;border-radius:4px;}
+    .lrow td,.erow td{text-align:center;padding:28px;color:var(--tx3);}
+    .erow td{font-style:italic;}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:600;white-space:nowrap;}
+    .ba{background:var(--gl);color:#065f46;border:1px solid rgba(16,185,129,.22);}
+    .be{background:var(--rl);color:#991b1b;border:1px solid rgba(239,68,68,.18);}
+    .bs2{background:var(--aml);color:#78350f;border:1px solid rgba(245,158,11,.20);}
+    .bv{background:#f1f5f9;color:var(--tx3);border:1px solid var(--bd);}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-size:11.5px;
+      font-weight:600;font-family:var(--sans);border:none;cursor:pointer;transition:all .12s;white-space:nowrap;}
+    .bp{background:var(--acc);color:#fff;}.bp:hover{background:#4f46e5;}
+    .bs{background:var(--sf);color:var(--tx2);border:1px solid var(--bd);}.bs:hover{background:var(--sf2);}
+    .br{background:var(--red);color:#fff;}.br:hover{background:#dc2626;}
+    .bg{background:var(--grn);color:#fff;}.bg:hover{background:#059669;}
+    .bam{background:var(--amb);color:#fff;}.bam:hover{background:#d97706;}
+    .xs{padding:4px 9px;font-size:10.5px;border-radius:5px;}
+
+    /* Toolbar */
+    .fbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .srch{display:flex;align-items:center;gap:7px;background:var(--sf2);border:1px solid var(--bd);
+      border-radius:7px;padding:6px 12px;min-width:220px;}
+    .srch input{border:none;outline:none;background:transparent;font-size:12px;color:var(--tx);
+      font-family:var(--sans);width:180px;}
+    .srch input::placeholder{color:var(--tx3);}
+    select.fsel{padding:6px 10px;border-radius:7px;font-size:12px;font-family:var(--sans);
+      color:var(--tx2);background:var(--sf);border:1px solid var(--bd);outline:none;}
+
+    /* Modal */
+    .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
+      align-items:center;justify-content:center;}
+    .mbg.open{display:flex;}
+    .modal{background:var(--sf);border-radius:16px;padding:24px;width:460px;max-width:96%;
+      box-shadow:0 20px 50px rgba(0,0,0,.2);}
+    .mtit{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:16px;}
+    .fr{margin-bottom:13px;}
+    .flbl{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;}
+    .finp{width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--bd);font-size:12.5px;
+      font-family:var(--sans);color:var(--tx);background:var(--sf);outline:none;
+      transition:border-color .12s,box-shadow .12s;}
+    .finp:focus{border-color:var(--acc);box-shadow:0 0 0 2px var(--al);}
+    .fhint{font-size:10.5px;color:var(--tx3);margin-top:4px;line-height:1.5;}
+    .mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:9px;font-size:12.5px;
+      font-weight:600;z-index:999;transition:opacity .3s;opacity:0;pointer-events:none;}
+    .toast.show{opacity:1;}
+    .toast.ok{background:var(--grn);color:#fff;}
+    .toast.err{background:var(--red);color:#fff;}
+
+    /* Info box */
+    .ibox{background:rgba(99,102,241,.06);border:1px solid var(--ab);border-radius:9px;
+      padding:12px 14px;font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;}
+    .ibox code{font-family:var(--mono);font-size:11px;background:var(--al);padding:1px 5px;border-radius:3px;}
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<div id="ls">
+  <div class="lcard">
+    <div class="llogo">
+      <div class="lgem">N</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--tx)">NestWorks</div>
+        <div style="font-size:9px;font-weight:600;color:var(--acc);letter-spacing:.7px;text-transform:uppercase">Admin Panel</div>
+      </div>
+    </div>
+    <div class="lsub">Sign in with your admin Supabase account</div>
+    <div class="lerr" id="le"></div>
+    <div class="lg"><label class="llbl">Email</label><input class="linp" id="lem" type="email" placeholder="connect@nest-works.in" autocomplete="email"></div>
+    <div class="lg"><label class="llbl">Password</label><input class="linp" id="lpw" type="password" placeholder="Password" autocomplete="current-password"></div>
+    <button class="lbtn" id="lbtn" onclick="doLogin()">
+      <div class="lspin" id="lspin"></div>
+      <span id="lbtxt">Sign In</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══ CREATE LICENSE MODAL ═══════════════════════════════════ -->
+<div class="mbg" id="mCreate">
+  <div class="modal" style="width:520px;max-height:90vh;overflow-y:auto">
+    <div class="mtit">Create New User &amp; License</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+      <div class="fr">
+        <label class="flbl">First Name *</label>
+        <input class="finp" id="f-fn" type="text" placeholder="Sreenivasulu">
+      </div>
+      <div class="fr">
+        <label class="flbl">Last Name *</label>
+        <input class="finp" id="f-ln" type="text" placeholder="Gali">
+      </div>
+    </div>
+
+    <div class="fr">
+      <label class="flbl">Email *</label>
+      <input class="finp" id="fe" type="email" placeholder="user@company.com">
+    </div>
+
+    <div class="fr">
+      <label class="flbl">Phone</label>
+      <input class="finp" id="f-ph" type="tel" placeholder="+91 98765 43210">
+    </div>
+
+    <div class="fr">
+      <label class="flbl">Password *</label>
+      <div style="display:flex;gap:8px">
+        <input class="finp" id="f-pw" type="text" placeholder="Auto-generated" style="flex:1">
+        <button class="btn bs" style="padding:6px 10px;border-radius:7px;white-space:nowrap" onclick="document.getElementById('f-pw').value=genPw()">&#x21bb; Generate</button>
+      </div>
+      <div class="fhint">User logs in with this password. Share it with them via email.</div>
+    </div>
+
+    <div style="height:1px;background:var(--bd);margin:4px 0 14px"></div>
+
+    <div class="fr">
+      <label class="flbl">Plan *</label>
+      <select class="finp" id="fp"></select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+      <div class="fr">
+        <label class="flbl">Duration (days)</label>
+        <input class="finp" id="fd" type="number" value="365" min="1">
+        <div class="fhint">365=1yr · 14=trial · 30=monthly</div>
+      </div>
+      <div class="fr">
+        <label class="flbl">Max Devices</label>
+        <input class="finp" id="fdev" type="number" value="3" min="1" max="10">
+      </div>
+    </div>
+
+    <div class="fr">
+      <label class="flbl">License Key</label>
+      <div style="display:flex;gap:8px">
+        <input class="finp" id="f-key" type="text" placeholder="NW-XXXX-XXXX-XXXX" style="flex:1;font-family:var(--mono);letter-spacing:.5px">
+        <button class="btn bs" style="padding:6px 10px;border-radius:7px;white-space:nowrap" onclick="document.getElementById('f-key').value=genKey()">&#x21bb; Generate</button>
+      </div>
+      <div class="fhint">Auto-generated. You can edit it or regenerate.</div>
+    </div>
+
+    <div class="fr">
+      <label class="flbl">Notes (optional)</label>
+      <input class="finp" id="fn" type="text" placeholder="e.g. Requested via email 2025-04-20">
+    </div>
+
+    <div class="mfoot">
+      <button class="btn bs" onclick="cm('mCreate')">Cancel</button>
+      <button class="btn bp" id="createBtn" onclick="submitCreate()">&#x2713; Create User &amp; License</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUSH VERSION MODAL ═════════════════════════════════════ -->
+<div class="mbg" id="mVer">
+  <div class="modal">
+    <div class="mtit">Push New Tool Version</div>
+    <div class="ibox">Upload changed .py / .html files to a GitHub Release, create a manifest.json, paste its URL below. All users auto-update on next launch — no reinstall.</div>
+    <div class="fr"><label class="flbl">Version *</label><input class="finp" id="vv" placeholder="1.4.2"></div>
+    <div class="fr">
+      <label class="flbl">Manifest URL *</label>
+      <input class="finp" id="vu" placeholder="https://nest-works.in/releases/1.4.2/manifest.json">
+      <div class="fhint">JSON listing each file path, SHA-256 checksum, and download URL.</div>
+    </div>
+    <div class="fr"><label class="flbl">Windows Installer URL</label><input class="finp" id="vw" placeholder="https://github.com/…/NestWorks-1.4.2-win.exe"></div>
+    <div class="fr"><label class="flbl">Mac Installer URL</label><input class="finp" id="vm" placeholder="https://github.com/…/NestWorks-1.4.2-mac.dmg"></div>
+    <div class="fr"><label class="flbl">Release Notes</label><textarea class="finp" id="vn" rows="3" placeholder="What changed…"></textarea></div>
+    <div class="mfoot">
+      <button class="btn bs" onclick="cm('mVer')">Cancel</button>
+      <button class="btn bp" onclick="submitVersion()">Push Version Live</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DEVICES MODAL ══════════════════════════════════════════ -->
+<div class="mbg" id="mDev">
+  <div class="modal" style="width:520px">
+    <div class="mtit">Activated Devices</div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Label</th><th>Platform</th><th>App Ver</th><th>First Seen</th><th>Last Seen</th><th></th></tr></thead>
+        <tbody id="devBody"><tr class="lrow"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="mfoot"><button class="btn bs" onclick="cm('mDev')">Close</button></div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══════════════════════════════════════════════ -->
+<div class="app" id="shell" style="display:none">
+  <header class="top">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="gem">N</div>
+      <div><div class="lname">NestWorks</div><div class="ltag">Admin Panel</div></div>
+    </div>
+    <div class="tdiv"></div>
+    <span class="ttit">License &amp; User Management</span>
+    <div class="tsp"></div>
+    <span class="awho" id="aw"></span>
+    <span class="abadge">Admin</span>
+  </header>
+
+  <div class="body">
+    <aside class="sidebar">
+      <div class="ssec">Main</div>
+      <div class="si on" id="n-db"   onclick="nav('db')">  <span class="sico">📊</span>Dashboard</div>
+      <div class="si"     id="n-usr"  onclick="nav('usr')"> <span class="sico">👥</span>Users &amp; Licenses</div>
+      <div class="ssec">Config</div>
+      <div class="si"     id="n-pln"  onclick="nav('pln')"> <span class="sico">📦</span>Plans</div>
+      <div class="si"     id="n-ver"  onclick="nav('ver')"> <span class="sico">🚀</span>App Versions</div>
+      <div class="sbot"><button class="sobt" onclick="doOut()">Sign Out</button></div>
+    </aside>
+
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <div class="view on" id="v-db">
+        <div class="phd">
+          <div><div class="ptit">Dashboard</div><div class="psub">Live overview from Supabase</div></div>
+          <button class="btn bs" onclick="loadDB()">⟳ Refresh</button>
+        </div>
+        <div class="sgrid">
+          <div class="sc"><div class="sn ca" id="st">—</div><div class="sl">Total Users</div></div>
+          <div class="sc"><div class="sn cg" id="sa">—</div><div class="sl">Active Licenses</div></div>
+          <div class="sc"><div class="sn cr" id="se">—</div><div class="sl">Expired</div></div>
+          <div class="sc"><div class="sn cam" id="ss">—</div><div class="sl">Suspended</div></div>
+          <div class="sc"><div class="sn ct" id="sd">—</div><div class="sl">Total Downloads</div></div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ctit">Recent Activity</div></div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>Email</th><th>Plan</th><th>Status</th><th>Expires</th><th>Last Seen</th></tr></thead>
+              <tbody id="rBody"><tr class="lrow"><td colspan="5">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="view" id="v-usr">
+        <div class="phd">
+          <div><div class="ptit">Users &amp; Licenses</div><div class="psub">All registered users and their license keys</div></div>
+          <button class="btn bp" onclick="om('mCreate')">+ Create License</button>
+        </div>
+        <div class="card">
+          <div class="chd">
+            <div class="fbar">
+              <div class="srch">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="uq" type="search" placeholder="Search email or key…" oninput="fu()">
+              </div>
+              <select class="fsel" id="usf" onchange="fu()">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="suspended">Suspended</option>
+                <option value="revoked">Revoked</option>
+              </select>
+            </div>
+            <span style="font-size:11px;color:var(--tx3)" id="uc"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>License Key</th><th>Plan</th><th>Status</th><th>Expires</th><th>Devices</th><th>Downloads</th><th>Last Seen</th><th>Actions</th></tr></thead>
+              <tbody id="uBody"><tr class="lrow"><td colspan="9">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLANS -->
+      <div class="view" id="v-pln">
+        <div class="phd"><div><div class="ptit">Plans</div><div class="psub">Shown on your website pricing page in real time</div></div></div>
+        <div class="ibox">Plans are read directly from Supabase. To add or edit a plan, go to your <strong>Supabase dashboard → Table Editor → plans</strong>. Changes reflect on the website immediately.</div>
+        <div id="planGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px"></div>
+      </div>
+
+      <!-- VERSIONS -->
+      <div class="view" id="v-ver">
+        <div class="phd">
+          <div><div class="ptit">App Versions</div><div class="psub">Push tool updates — silently applied on next user launch</div></div>
+          <button class="btn bp" onclick="om('mVer')">+ Push Version</button>
+        </div>
+        <div class="ibox">
+          <strong>How to push an update:</strong><br>
+          1. Upload changed .py / .html files to a GitHub Release (private repo).<br>
+          2. Create a <code>manifest.json</code> listing each file's path, SHA-256, and download URL.<br>
+          3. Paste the manifest URL here → every user auto-updates on next launch. No reinstall.
+        </div>
+        <div class="card">
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>Version</th><th>Status</th><th>Released</th><th>Windows</th><th>Mac</th><th>Release Notes</th></tr></thead>
+              <tbody id="vBody"><tr class="lrow"><td colspan="6">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   ▶  CONFIG — paste your values from Supabase → Settings → API
+   ════════════════════════════════════════════════════════════ */
+const SB_URL  = 'https://txschnjbpypyqvwehenh.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c2NobmpicHlweXF2d2VoZW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwOTQsImV4cCI6MjA5MjIzMzA5NH0.jfQmKbG7jNsjVqjpKX4OHSsrpPKq01pabcjOSVE0DQo';
+/* Admin emails — only these can log in */
+const ADMINS  = ['nestworks99@gmail.com', 'connect@nest-works.in'];
+/* ════════════════════════════════════════════════════════════ */
+
+const { createClient } = supabase;
+const sb = createClient(SB_URL, SB_ANON);
+
+let users = [], plans = [];
+
+/* ── Helpers ──────────────────────────────────────────────── */
+const fd = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const sbadge = s => {
+  const m={active:'ba',expired:'be',suspended:'bs2',revoked:'bv'};
+  return `<span class="badge ${m[s]||'bv'}">${s||'—'}</span>`;
+};
+function toast(m,t='ok'){
+  const e=document.getElementById('toast');
+  e.textContent=m; e.className='toast show '+t;
+  setTimeout(()=>e.classList.remove('show'),3000);
+}
+const om = id => document.getElementById(id).classList.add('open');
+const cm = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.mbg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open');}));
+
+/* ── Auth ─────────────────────────────────────────────────── */
+async function doLogin(){
+  const em=document.getElementById('lem').value.trim().toLowerCase();
+  const pw=document.getElementById('lpw').value;
+  const err=document.getElementById('le');
+  err.classList.remove('show');
+  if(!ADMINS.includes(em)){err.textContent='No admin access for this email.';err.classList.add('show');return;}
+  document.getElementById('lbtn').disabled=true;
+  document.getElementById('lspin').style.display='block';
+  document.getElementById('lbtxt').textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email:em,password:pw});
+  document.getElementById('lbtn').disabled=false;
+  document.getElementById('lspin').style.display='none';
+  document.getElementById('lbtxt').textContent='Sign In';
+  if(error){err.textContent=error.message||'Login failed.';err.classList.add('show');return;}
+  launch(em);
+}
+async function doOut(){await sb.auth.signOut();document.getElementById('shell').style.display='none';document.getElementById('ls').style.display='flex';}
+function launch(email){
+  document.getElementById('aw').textContent=email;
+  document.getElementById('ls').style.display='none';
+  document.getElementById('shell').style.display='flex';
+  loadDB();
+}
+document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+window.addEventListener('DOMContentLoaded',async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session&&ADMINS.includes(session.user.email))launch(session.user.email);
+});
+
+/* ── Navigation ───────────────────────────────────────────── */
+const loaders={db:loadDB,usr:loadUsers,pln:loadPlans,ver:loadVersions};
+function nav(n){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.si').forEach(s=>s.classList.remove('on'));
+  document.getElementById('v-'+n).classList.add('on');
+  document.getElementById('n-'+n).classList.add('on');
+  loaders[n]?.();
+}
+
+/* ── Dashboard ────────────────────────────────────────────── */
+async function loadDB(){
+  const{data:rows}=await sb.from('user_license_summary').select('*');
+  const all=rows||[];
+  document.getElementById('st').textContent=all.length;
+  document.getElementById('sa').textContent=all.filter(r=>r.status==='active').length;
+  document.getElementById('se').textContent=all.filter(r=>r.status==='expired').length;
+  document.getElementById('ss').textContent=all.filter(r=>r.status==='suspended').length;
+  const{count}=await sb.from('download_events').select('*',{count:'exact',head:true});
+  document.getElementById('sd').textContent=count||0;
+  const recent=[...all].filter(r=>r.last_seen_at).sort((a,b)=>new Date(b.last_seen_at)-new Date(a.last_seen_at)).slice(0,8);
+  document.getElementById('rBody').innerHTML=!recent.length
+    ?'<tr class="erow"><td colspan="5">No activity yet</td></tr>'
+    :recent.map(r=>`<tr><td><strong>${r.email}</strong></td><td>${r.plan_name||'—'}</td><td>${sbadge(r.status)}</td><td>${fd(r.expires_at)}</td><td>${fd(r.last_seen_at)}</td></tr>`).join('');
+}
+
+/* ── Users ────────────────────────────────────────────────── */
+async function loadUsers(){
+  document.getElementById('uBody').innerHTML='<tr class="lrow"><td colspan="9">Loading…</td></tr>';
+  const{data}=await sb.from('user_license_summary').select('*').order('registered_at',{ascending:false});
+  users=data||[];
+  renderUsers(users);
+}
+function renderUsers(rows){
+  document.getElementById('uc').textContent=rows.length+' users';
+  const b=document.getElementById('uBody');
+  if(!rows.length){b.innerHTML='<tr class="erow"><td colspan="9">No users found</td></tr>';return;}
+  b.innerHTML=rows.map(r=>`<tr>
+    <td><strong>${[r.first_name,r.last_name].filter(Boolean).join(' ')||'—'}</strong></td>
+    <td>${r.email}</td>
+    <td style="font-size:11px">${r.phone||'—'}</td>
+    <td>${r.license_key?`<code>${r.license_key}</code>`:'—'}</td>
+    <td>${r.plan_name||'—'}</td>
+    <td>${sbadge(r.status)}</td>
+    <td>${fd(r.expires_at)}</td>
+    <td>${r.license_id?`${r.activated_devices||0}/${r.max_devices||3}`:'—'}</td>
+    <td>${r.download_count||0}</td>
+    <td>${fd(r.last_seen_at)||'Never'}</td>
+    <td>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${r.license_id?`
+          ${r.status==='active'?`<button class="btn bam xs" onclick="la('${r.license_id}','suspend')">Suspend</button>`:''}
+          ${r.status!=='active'?`<button class="btn bg xs" onclick="la('${r.license_id}','activate')">Activate</button>`:''}
+          <button class="btn bs xs" onclick="ext('${r.license_id}')">+Extend</button>
+          <button class="btn bs xs" onclick="vdev('${r.license_id}')">Devices</button>
+          <button class="btn br xs" onclick="la('${r.license_id}','revoke')">Revoke</button>
+        `:`<button class="btn bp xs" onclick="ocmf('${r.email}')">+ Add Key</button>`}
+      </div>
+    </td>
+  </tr>`).join('');
+}
+function fu(){
+  const q=document.getElementById('uq').value.toLowerCase();
+  const s=document.getElementById('usf').value;
+  renderUsers(users.filter(r=>(!q||r.email?.toLowerCase().includes(q)||r.license_key?.toLowerCase().includes(q))&&(!s||r.status===s)));
+}
+async function la(id,action){
+  if(action==='revoke'&&!confirm('Revoke this license? User loses access immediately.'))return;
+  const m={suspend:'suspended',revoke:'revoked',activate:'active'};
+  const{error}=await sb.from('licenses').update({status:m[action],updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast(error.message,'err');return;}
+  toast('License '+action+'d','ok'); loadUsers();
+}
+async function ext(id){
+  const days=parseInt(prompt('Extend by how many days?','365'));
+  if(!days||isNaN(days))return;
+  const{data:lic}=await sb.from('licenses').select('expires_at').eq('id',id).single();
+  const base=new Date(Math.max(new Date(lic.expires_at),new Date()));
+  base.setDate(base.getDate()+days);
+  const{error}=await sb.from('licenses').update({expires_at:base.toISOString(),status:'active',updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast(error.message,'err');return;}
+  toast('Extended to '+base.toISOString().slice(0,10),'ok'); loadUsers();
+}
+async function vdev(id){
+  om('mDev');
+  const{data}=await sb.from('device_activations').select('*').eq('license_id',id).order('first_seen_at');
+  const b=document.getElementById('devBody');
+  if(!data?.length){b.innerHTML='<tr class="erow"><td colspan="6">No devices activated yet</td></tr>';return;}
+  b.innerHTML=data.map(d=>`<tr>
+    <td><strong>${d.machine_label||'—'}</strong></td><td>${d.platform||'—'}</td>
+    <td>${d.app_version||'—'}</td><td>${fd(d.first_seen_at)}</td><td>${fd(d.last_seen_at)}</td>
+    <td><button class="btn br xs" onclick="rdev('${d.id}','${id}')">Remove</button></td>
+  </tr>`).join('');
+}
+async function rdev(did,lid){
+  if(!confirm('Remove this device? Frees up a license slot.'))return;
+  await sb.from('device_activations').delete().eq('id',did);
+  toast('Device removed','ok'); vdev(lid);
+}
+
+/* ── Create license ───────────────────────────────────────── */
+function ocmf(email=''){
+  document.getElementById('fe').value=email;
+  document.getElementById('f-fn').value='';
+  document.getElementById('f-ln').value='';
+  document.getElementById('f-ph').value='';
+  document.getElementById('f-pw').value=genPw();
+  document.getElementById('f-key').value=genKey();
+  document.getElementById('fn').value='';
+  lpsel();
+  om('mCreate');
+}
+async function lpsel(){
+  const s = document.getElementById('fp');
+  s.innerHTML = '<option value="">Loading plans…</option>';
+  try{
+    const url = SB_URL+'/rest/v1/plans?select=id,name,duration_days,max_devices&is_active=eq.true&order=sort_order';
+    const res = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+      headers:{
+        'apikey':        SB_ANON,
+        'Authorization': 'Bearer '+SB_ANON,
+        'Accept':        'application/json'
+      }
+    });
+    const txt = await res.text();
+    let data = [];
+    try{ data = JSON.parse(txt); } catch(e){ data = []; }
+    if(!Array.isArray(data)) data = [];
+
+    if(!data.length){
+      s.innerHTML='<option value="">No plans found — run fix_plans_rls.sql in Supabase</option>';
+      return;
+    }
+    s.innerHTML='<option value="">Select plan…</option>'+
+      data.map(p=>`<option value="${p.id}" data-d="${p.duration_days}" data-v="${p.max_devices}">${p.name} — ${p.duration_days}d, ${p.max_devices} devices</option>`).join('');
+    s.onchange=()=>{
+      const o=s.selectedOptions[0];
+      if(o.dataset.d) document.getElementById('fd').value=o.dataset.d;
+      if(o.dataset.v) document.getElementById('fdev').value=o.dataset.v;
+    };
+  } catch(e){
+    s.innerHTML='<option value="">Error loading plans: '+e.message+'</option>';
+  }
+}
+function genKey(){return 'NW-'+Array.from({length:3},()=>Math.random().toString(36).slice(2,6).toUpperCase().replace(/[^A-Z0-9]/g,()=>Math.floor(Math.random()*10)+'').slice(0,4)).join('-');}
+async function submitCreate(){
+  const firstName = document.getElementById('f-fn').value.trim();
+  const lastName  = document.getElementById('f-ln').value.trim();
+  const email     = document.getElementById('fe').value.trim().toLowerCase();
+  const phone     = document.getElementById('f-ph').value.trim();
+  const password  = document.getElementById('f-pw').value.trim();
+  const pid       = document.getElementById('fp').value;
+  const days      = parseInt(document.getElementById('fd').value);
+  const devs      = parseInt(document.getElementById('fdev').value);
+  const licKey    = document.getElementById('f-key').value.trim() || genKey();
+  const notes     = document.getElementById('fn').value.trim();
+
+  if(!firstName){ toast('First name required','err'); return; }
+  if(!email)    { toast('Email required','err');      return; }
+  if(!password) { toast('Password required','err');   return; }
+  if(!pid)      { toast('Select a plan','err');       return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  try{
+    /* Step 1: Create Supabase Auth user */
+    /* We use signUp with a throwaway session — admin is already signed in */
+    /* The user won't be auto-logged-in because we use a separate auth call */
+    const {data:signUpData, error:signUpErr} = await sb.auth.admin?.createUser
+      ? {data:null, error:{message:'admin.createUser not available in browser'}}
+      : {data:null, error:null};
+
+    /* Since admin.createUser requires service role (not available in browser),
+       we use a workaround: call Supabase REST API directly with the anon key.
+       Supabase allows signUp even when logged in as a different user. */
+    const signUpRes = await fetch(SB_URL+'/auth/v1/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SB_ANON,
+        'Authorization': 'Bearer '+SB_ANON,
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const signUpJson = await signUpRes.json();
+
+    if(!signUpRes.ok && !signUpJson.id){
+      /* User might already exist — try to find them */
+      const {data:existing} = await sb
+        .from('user_license_summary')
+        .select('user_id')
+        .eq('email', email)
+        .maybeSingle();
+      if(!existing?.user_id){
+        toast(signUpJson.msg || signUpJson.error_description || 'Failed to create account', 'err');
+        return;
+      }
+      /* User exists — proceed with their existing ID */
+      var userId = existing.user_id;
+    } else {
+      var userId = signUpJson.id;
+    }
+
+    /* Step 2: Save profile (name + phone) */
+    if(userId){
+      await sb.from('user_profiles').upsert({
+        id: userId, first_name: firstName,
+        last_name: lastName, phone,
+        updated_at: new Date().toISOString()
+      }, {onConflict:'id'});
+    }
+
+    /* Step 3: Revoke any existing active license */
+    if(userId){
+      await sb.from('licenses')
+        .update({status:'revoked', updated_at: new Date().toISOString()})
+        .eq('user_id', userId)
+        .eq('status', 'active');
+    }
+
+    /* Step 4: Calculate expiry */
+    const exp = new Date();
+    exp.setDate(exp.getDate() + days);
+
+    /* Step 5: Insert license */
+    const {error:licErr} = await sb.from('licenses').insert({
+      user_id:     userId || null,
+      license_key: licKey,
+      plan_id:     pid,
+      status:      'active',
+      max_devices: devs,
+      expires_at:  exp.toISOString(),
+      notes
+    });
+
+    if(licErr){ toast(licErr.message,'err'); return; }
+
+    /* Step 6: Show admin a summary to copy and email to user */
+    const planName = document.getElementById('fp').selectedOptions[0]?.text?.split(' —')[0] || 'Professional';
+    cm('mCreate');
+    toast('User and license created successfully!','ok');
+
+    /* Show a copyable summary for the admin to email to the user */
+    showUserSummary({
+      firstName, lastName, email, phone,
+      password, licKey, planName,
+      expires: exp.toDateString(),
+      maxDevices: devs
+    });
+
+    loadUsers();
+  } catch(e){
+    toast('Error: '+e.message,'err');
+  } finally{
+    btn.disabled=false; btn.textContent='✓ Create User & License';
+  }
+}
+
+/* Show a modal with user details for admin to copy and email */
+function showUserSummary(u){
+  const existing = document.getElementById('mSummary');
+  if(existing) existing.remove();
+
+  const html = `
+  <div class="mbg open" id="mSummary">
+    <div class="modal" style="width:500px">
+      <div class="mtit" style="color:var(--grn)">✓ User Created Successfully</div>
+      <div style="background:#f0fdf4;border:1px solid rgba(16,185,129,.25);border-radius:9px;padding:14px;margin-bottom:14px;font-size:12px;color:#065f46;line-height:1.6">
+        Copy the details below and email them to the user from connect@nest-works.in
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:14px;font-family:var(--mono);font-size:12px;line-height:2;white-space:pre-wrap;user-select:all" id="summaryText">Name:        ${u.firstName} ${u.lastName}
+Email:       ${u.email}
+Phone:       ${u.phone||'—'}
+Password:    ${u.password}
+License Key: ${u.licKey}
+Plan:        ${u.planName}
+Valid Until: ${u.expires}
+Max Devices: ${u.maxDevices}
+Download:    https://nest-works.in/download.html</div>
+      <div class="mfoot" style="justify-content:space-between">
+        <button class="btn bg" onclick="copySum()">&#x2398; Copy All</button>
+        <button class="btn bs" onclick="document.getElementById('mSummary').remove()">Close</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function copySum(){
+  const txt = document.getElementById('summaryText').innerText;
+  navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard — paste into your email','ok'));
+}
+
+function genPw(){
+  const w=['Falcon','Tiger','Storm','Delta','Alpha','Nexus','Eagle','Swift'];
+  return w[Math.floor(Math.random()*w.length)]+'@'+Math.floor(1000+Math.random()*9000);
+}
+
+
+
+/* ── Plans ────────────────────────────────────────────────── */
+async function loadPlans(){
+  let data = [];
+  try{
+    const res = await fetch(SB_URL+'/rest/v1/plans?order=sort_order', {
+      headers:{
+        'apikey': SB_ANON,
+        'Authorization': 'Bearer '+SB_ANON,
+        'Content-Type': 'application/json'
+      }
+    });
+    data = res.ok ? await res.json() : [];
+  } catch(e){ data=[]; }
+
+  const g=document.getElementById('planGrid');
+  if(!data.length){
+    g.innerHTML='<div style="color:var(--tx3);font-size:12px">No plans found. Run the SQL setup script first.</div>';
+    return;
+  }
+  g.innerHTML=data.map(p=>`
+    <div style="border:1px solid var(--bd);border-radius:10px;padding:14px;background:var(--sf2)">
+      <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px">${p.name}</div>
+      <div style="font-size:11px;color:var(--tx3);line-height:1.6">
+        ${p.description||''}<br>
+        <strong>${p.duration_days} days</strong> · <strong>${p.max_devices} devices</strong><br>
+        ${p.is_active?'<span style="color:var(--grn)">Active</span>':'<span style="color:var(--tx3)">Hidden</span>'}
+      </div>
+    </div>`).join('');
+}
+
+/* ── Versions ─────────────────────────────────────────────── */
+async function loadVersions(){
+  const{data}=await sb.from('app_versions').select('*').order('created_at',{ascending:false});
+  const b=document.getElementById('vBody');
+  if(!data?.length){b.innerHTML='<tr class="erow"><td colspan="6">No versions pushed yet</td></tr>';return;}
+  b.innerHTML=data.map(v=>`<tr>
+    <td><strong>${v.version}</strong></td>
+    <td>${v.is_current?'<span class="badge ba">Current</span>':'<span class="badge bv">Old</span>'}</td>
+    <td>${fd(v.created_at)}</td>
+    <td>${v.windows_url?`<a href="${v.windows_url}" target="_blank" style="color:var(--acc);font-size:11px">.exe ↗</a>`:'—'}</td>
+    <td>${v.mac_url?`<a href="${v.mac_url}" target="_blank" style="color:var(--acc);font-size:11px">.dmg ↗</a>`:'—'}</td>
+    <td style="font-size:11px;color:var(--tx3)">${v.release_notes||'—'}</td>
+  </tr>`).join('');
+}
+async function submitVersion(){
+  const ver=document.getElementById('vv').value.trim();
+  const url=document.getElementById('vu').value.trim();
+  const win=document.getElementById('vw').value.trim();
+  const mac=document.getElementById('vm').value.trim();
+  const notes=document.getElementById('vn').value.trim();
+  if(!ver||!url){toast('Version and manifest URL required','err');return;}
+  await sb.from('app_versions').update({is_current:false}).neq('version','__none__');
+  const{error}=await sb.from('app_versions').upsert(
+    {version:ver,manifest_url:url,windows_url:win||null,mac_url:mac||null,release_notes:notes,is_current:true},
+    {onConflict:'version'}
+  );
+  if(error){toast(error.message,'err');return;}
+  cm('mVer'); toast('Version '+ver+' is live!','ok'); loadVersions();
+}
+</script>
+</body>
+</html>
