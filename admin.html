@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>NestJMXEnhancer — Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#f5f4f0;--sf:#ffffff;--sf2:#faf9f7;--sf3:#f0efe9;
+  --bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.15);
+  --tx:#1c1b18;--tx2:#57564e;--tx3:#a0998e;
+  --acc:#c17f3a;--al:rgba(193,127,58,.1);--ab:rgba(193,127,58,.22);
+  --grn:#2d7a4f;--gl:rgba(45,122,79,.1);
+  --red:#c0392b;--rl:rgba(192,57,43,.09);
+  --blu:#1a56a0;--bl:rgba(26,86,160,.1);
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--sans);font-size:13px;color:var(--tx)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:2px}
+
+/* LOGIN */
+.screen{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);align-items:center;justify-content:center}
+.screen.on{display:flex}
+.scard{width:380px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.scard-logo{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.slogo-sq{width:32px;height:32px;background:var(--tx);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.slogo-dot{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.slogo-name{font-size:15px;font-weight:600;color:var(--tx)}
+.slogo-sub{font-size:11px;color:var(--tx3)}
+.shd{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:5px}
+.ssd{font-size:12px;color:var(--tx3);margin-bottom:20px;line-height:1.6}
+.fl{display:flex;flex-direction:column;gap:11px}
+.flbl{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:4px}
+.finp{width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--bd2);font-size:13px;font-family:var(--sans);color:var(--tx);background:var(--sf2);outline:none;transition:border-color .12s}
+.finp:focus{border-color:var(--acc);box-shadow:0 0 0 2.5px var(--al)}
+.finp::placeholder{color:var(--tx3)}
+.fbtn{width:100%;padding:10px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--sans);color:#fff;background:var(--tx);transition:all .13s}
+.fbtn:hover{background:#2d2c26}
+.fbtn:disabled{opacity:.45;cursor:not-allowed}
+.ferr{display:none;background:var(--rl);border:1px solid rgba(192,57,43,.2);border-radius:6px;padding:8px 11px;font-size:12px;color:#922b21;line-height:1.55;margin-bottom:4px}
+.ferr.on{display:block}
+
+/* APP SHELL */
+.app{display:flex;flex-direction:column;height:100%}
+.top{height:46px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.tlogo{display:flex;align-items:center;gap:7px}
+.tls{width:22px;height:22px;background:var(--tx);border-radius:5px;display:flex;align-items:center;justify-content:center}
+.tld{width:6px;height:6px;border-radius:50%;background:var(--acc)}
+.tn{font-size:12.5px;font-weight:600;color:var(--tx)}
+.ta{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--acc);border:1px solid var(--ab);padding:2px 7px;border-radius:4px}
+.tdiv{width:1px;height:16px;background:var(--bd)}
+.ttit{font-size:11.5px;color:var(--tx3)}
+.tsp{flex:1}
+.twho{font-size:11px;color:var(--tx3)}
+.tbtn{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;background:transparent;border:1px solid var(--bd);cursor:pointer;font-family:var(--sans);color:var(--tx2);transition:all .1s}
+.tbtn:hover{background:var(--rl);color:var(--red);border-color:rgba(192,57,43,.25)}
+.body{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:196px;flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:10px 0;overflow-y:auto}
+.sbsec{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);padding:10px 13px 5px}
+.si{display:flex;align-items:center;gap:8px;padding:7px 13px;font-size:12.5px;font-weight:500;color:var(--tx2);cursor:pointer;border-left:2px solid transparent;transition:all .1s}
+.si:hover{background:var(--sf2)}
+.si.on{color:var(--tx);background:var(--al);border-left-color:var(--acc);font-weight:600}
+.si svg{width:14px;height:14px;flex-shrink:0;opacity:.6}
+.si.on svg{opacity:1}
+.sb-sp{flex:1}
+.sb-ver{font-size:10px;color:var(--tx3);padding:10px 13px;font-family:var(--mono)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:20px 24px}
+.view{display:none}
+.view.on{display:block}
+.vhd{margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.vtit{font-size:17px;font-weight:600;color:var(--tx)}
+.vsub{font-size:12px;color:var(--tx3);margin-top:2px}
+
+/* STAT CARDS */
+.scards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px 16px}
+.sn{font-size:22px;font-weight:700;color:var(--tx);line-height:1}
+.sn.ca{color:var(--acc)}
+.sn.cg{color:var(--grn)}
+.sn.cb{color:var(--blu)}
+.sn.cd{color:var(--tx3)}
+.sl{font-size:10.5px;color:var(--tx3);font-weight:500;margin-top:4px}
+
+/* TABLE */
+.tbl-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.tbl-head{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tbl-title{font-size:12.5px;font-weight:600;color:var(--tx)}
+.tbl-outer{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:var(--sf2);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);padding:8px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bd)}
+td{padding:9px 12px;border-bottom:1px solid var(--sf3);font-size:12px;color:var(--tx2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--sf2)}
+.erow td,.lrow td{text-align:center;color:var(--tx3);padding:24px;font-style:italic}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600;white-space:nowrap}
+.ba{background:var(--gl);color:var(--grn);border:1px solid rgba(45,122,79,.2)}
+.bt{background:var(--ab);color:var(--acc);border:1px solid rgba(193,127,58,.3)}
+.be{background:#fff3f3;color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.bs2{background:#fff8e1;color:#b45309;border:1px solid rgba(180,83,9,.2)}
+.bv{background:var(--sf3);color:var(--tx3);border:1px solid var(--bd)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;font-size:11.5px;font-weight:500;font-family:var(--sans);cursor:pointer;border:1px solid transparent;transition:all .1s}
+.bp{background:var(--tx);color:#fff;border-color:var(--tx)}
+.bp:hover{background:#2d2c26}
+.bg{background:var(--gl);color:var(--grn);border-color:rgba(45,122,79,.3)}
+.bg:hover{background:rgba(45,122,79,.15)}
+.bam{background:var(--al);color:var(--acc);border-color:rgba(193,127,58,.3)}
+.bam:hover{background:var(--ab)}
+.bs{background:var(--sf2);color:var(--tx2);border-color:var(--bd2)}
+.bs:hover{background:var(--sf3)}
+.br{background:var(--rl);color:var(--red);border-color:rgba(192,57,43,.2)}
+.br:hover{background:rgba(192,57,43,.12)}
+.btn.xs{padding:3px 8px;font-size:10.5px}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
+.mbg.on{display:flex}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:22px;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.mtit{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:16px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--bd)}
+.fr{margin-bottom:12px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fhint{font-size:10.5px;color:var(--tx3);margin-top:3px}
+.ibox{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:4px}
+.sumbox{background:var(--al);border:1px solid var(--ab);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--acc);margin-bottom:12px}
+.sumdata{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:12px;font-size:11.5px;font-family:var(--mono);color:var(--tx2);white-space:pre-wrap;line-height:1.7;word-break:break-all}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:12.5px;font-weight:500;z-index:999;transform:translateY(8px);opacity:0;transition:all .2s;pointer-events:none}
+.toast.on{transform:translateY(0);opacity:1}
+.toast.ok{background:#1a2e1f;color:#a7f3c1}
+.toast.err{background:#3b0d0d;color:#fca5a5}
+
+/* SEARCH */
+.search-row{display:flex;align-items:center;gap:10px}
+.sinp{padding:6px 11px;border-radius:6px;border:1px solid var(--bd2);font-size:12px;font-family:var(--sans);color:var(--tx);background:var(--sf2);outline:none;width:220px}
+.sinp:focus{border-color:var(--acc)}
+
+/* PLAN TILES */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.ptile{background:var(--sf);border:1px solid var(--bd);border-radius:9px;padding:16px;font-size:12px;color:var(--tx2);line-height:1.7}
+.ptile-name{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:6px}
+.ptile-meta{font-size:11.5px;color:var(--tx3)}
+
+@media(max-width:800px){.scards{grid-template-columns:repeat(2,1fr)}.sb{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="screen on" id="scrLogin">
+  <div class="scard">
+    <div class="scard-logo">
+      <div class="slogo-sq"><div class="slogo-dot"></div></div>
+      <div>
+        <div class="slogo-name">NestWorks</div>
+        <div class="slogo-sub">Admin Portal</div>
+      </div>
+    </div>
+    <div class="shd">Sign in to Admin</div>
+    <div class="ssd">Access restricted to authorised admin accounts only.</div>
+    <div class="ferr" id="lerr"></div>
+    <div class="fl">
+      <div>
+        <label class="flbl">Email</label>
+        <input class="finp" id="lem" type="email" placeholder="nestworks99@gmail.com" autocomplete="email"/>
+      </div>
+      <div>
+        <label class="flbl">Password</label>
+        <input class="finp" id="lpw" type="password" placeholder="Your password"/>
+      </div>
+      <button class="fbtn" id="lbtn" onclick="doLogin()">Sign In →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- Top bar -->
+  <div class="top">
+    <div class="tlogo">
+      <div class="tls"><div class="tld"></div></div>
+      <span class="tn">NestWorks</span>
+      <span class="ta">ADMIN</span>
+    </div>
+    <div class="tdiv"></div>
+    <span class="ttit">NestJMXEnhancer License Management</span>
+    <div class="tsp"></div>
+    <span class="twho" id="twho"></span>
+    <button class="tbtn" onclick="doOut()">Sign Out</button>
+  </div>
+
+  <div class="body">
+
+    <!-- Sidebar -->
+    <nav class="sb">
+      <div class="sbsec">Overview</div>
+      <div class="si on" id="n-db" onclick="nav('db')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h3"/></svg>
+        Dashboard
+      </div>
+      <div class="si" id="n-usr" onclick="nav('usr')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/></svg>
+        Users &amp; Licenses
+      </div>
+      <div class="sbsec">Config</div>
+      <div class="si" id="n-pln" onclick="nav('pln')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        Plans
+      </div>
+      <div class="sb-sp"></div>
+      <div class="sb-ver">v1.0 · nest-works.in</div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="view on" id="v-db">
+        <div class="vhd">
+          <div><div class="vtit">Dashboard</div><div class="vsub">Live stats from Supabase</div></div>
+          <button class="btn bs" onclick="loadDB()">↻ Refresh</button>
+        </div>
+        <div class="scards">
+          <div class="sc"><div class="sn" id="s-tot">—</div><div class="sl">Total Users</div></div>
+          <div class="sc"><div class="sn cg" id="s-act">—</div><div class="sl">Active Licenses</div></div>
+          <div class="sc"><div class="sn" style="color:var(--red)" id="s-exp">—</div><div class="sl">Expired</div></div>
+          <div class="sc"><div class="sn ca" id="s-sus">—</div><div class="sl">Suspended</div></div>
+          <div class="sc"><div class="sn cb" id="s-dl">—</div><div class="sl">JMX Downloads</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head"><span class="tbl-title">Recent Activity</span></div>
+          <div class="tbl-outer">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Expires</th><th>Last Active</th></tr></thead>
+              <tbody id="recBody"><tr class="lrow"><td colspan="6">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS & LICENSES -->
+      <div class="view" id="v-usr">
+        <div class="vhd">
+          <div><div class="vtit">Users &amp; Licenses</div><div class="vsub">All registered users and their license status</div></div>
+          <div class="search-row">
+            <input class="sinp" id="usrSearch" placeholder="Search name or email…" oninput="filterUsers()"/>
+            <button class="btn bs" onclick="loadUsers()">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-outer">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Status</th><th>Key</th><th>Expires</th><th>Days Left</th><th>Registered</th><th>Actions</th></tr></thead>
+              <tbody id="uBody"><tr class="lrow"><td colspan="10">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLANS -->
+      <div class="view" id="v-pln">
+        <div class="vhd">
+          <div><div class="vtit">Plans</div><div class="vsub">License plans available to users</div></div>
+          <button class="btn bp" onclick="om('mNewPlan')">+ Create Plan</button>
+        </div>
+        <div id="pGrid" class="pgrid"></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ UPGRADE PLAN MODAL ══ -->
+<div class="mbg" id="mUpgrade">
+  <div class="modal" style="width:440px">
+    <div class="mtit">Upgrade Plan</div>
+    <div class="ibox" id="upgradeUserInfo" style="margin-bottom:14px"></div>
+    <div class="fr">
+      <label class="flbl">Select New Plan *</label>
+      <select class="finp" id="upgradePlan" onchange="onUpgradePlanChange()">
+        <option value="">— Select plan —</option>
+      </select>
+    </div>
+    <div class="fgrid" style="margin-top:10px">
+      <div class="fr">
+        <label class="flbl">Duration (days)</label>
+        <input class="finp" id="upgradeDays" type="number" value="365" min="1">
+      </div>
+      <div class="fr">
+        <label class="flbl">Max Devices</label>
+        <input class="finp" id="upgradeDevices" type="number" value="1" min="1" max="10">
+      </div>
+    </div>
+    <div class="fr" style="margin-top:10px">
+      <label class="flbl">New License Key</label>
+      <div style="display:flex;gap:6px">
+        <input class="finp" id="upgradeKey" type="text" style="flex:1;font-family:var(--mono);letter-spacing:.5px">
+        <button class="btn bs" onclick="document.getElementById('upgradeKey').value=mkkey()">↺</button>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bs" onclick="cm('mUpgrade')">Cancel</button>
+      <button class="btn bp" id="upgradBtn" onclick="submitUpgrade()">✓ Upgrade &amp; Generate Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ UPGRADE SUCCESS MODAL ══ -->
+<div class="mbg" id="mUpgradeSuccess">
+  <div class="modal" style="width:460px">
+    <div class="mtit" style="color:var(--grn)">✓ Plan Upgraded — Send this Email</div>
+    <div class="sumbox">Copy and send from <strong>connect@nest-works.in</strong></div>
+    <div class="sumdata" id="upgradeEmailData"></div>
+    <div class="mfoot">
+      <button class="btn bg" onclick="navigator.clipboard.writeText(document.getElementById('upgradeEmailData').textContent).then(()=>toast('Copied!','ok'))">⎘ Copy Email</button>
+      <button class="btn bs" onclick="cm('mUpgradeSuccess')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NEW PLAN MODAL ══ -->
+<div class="mbg" id="mNewPlan">
+  <div class="modal">
+    <div class="mtit">Create Plan</div>
+    <div class="fr"><label class="flbl">Plan Name *</label><input class="finp" id="pname" placeholder="e.g. Standard"></div>
+    <div class="fr"><label class="flbl">Description</label><input class="finp" id="pdesc" placeholder="Brief description"></div>
+    <div class="fgrid">
+      <div class="fr"><label class="flbl">Duration (days) *</label><input class="finp" id="pdays" type="number" value="365" min="1"></div>
+      <div class="fr"><label class="flbl">Max Devices *</label><input class="finp" id="pdev" type="number" value="1" min="1" max="20"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bs" onclick="cm('mNewPlan')">Cancel</button>
+      <button class="btn bp" onclick="createPlan()">Create Plan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const SB_URL     = 'https://txschnjbpypyqvwehenh.supabase.co';
+const SB_ANON    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c2NobmpicHlweXF2d2VoZW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwOTQsImV4cCI6MjA5MjIzMzA5NH0.jfQmKbG7jNsjVqjpKX4OHSsrpPKq01pabcjOSVE0DQo';
+// ⚠️ Service role key — this page must be kept private (admin access only)
+const SB_SERVICE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c2NobmpicHlweXF2d2VoZW5oIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjY1NzA5NCwiZXhwIjoyMDkyMjMzMDk0fQ.G_eWxwiLLa4fGlcqxc7dr_iAQPeYrwK0OnMSjBi7PRM';
+const ADMINS     = ['nestworks99@gmail.com', 'connect@nest-works.in'];
+
+const sb = supabase.createClient(SB_URL, SB_ANON);
+let allUsers = [], allPlans = [], _upgradeTarget = {};
+
+// ── Supabase direct API helpers ───────────────────────────────────────────────
+const svcHdr = () => ({
+  'apikey':        SB_SERVICE,
+  'Authorization': `Bearer ${SB_SERVICE}`,
+  'Content-Type':  'application/json',
+  'Prefer':        'return=representation',
+});
+
+async function sbGet(table, params = {}) {
+  const q = new URLSearchParams({ select: '*', ...params });
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${q}`, { headers: svcHdr() });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbPost(table, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST', headers: svcHdr(), body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbPatch(table, col, val, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${col}=eq.${val}`, {
+    method: 'PATCH', headers: svcHdr(), body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fd = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+const sbadge = s => {
+  const m = {active:'ba',trial:'bt',expired:'be',suspended:'bs2',revoked:'bv'};
+  return `<span class="badge ${m[s]||'bv'}">${s||'—'}</span>`;
+};
+function toast(m, t='ok') {
+  const e = document.getElementById('toast');
+  e.textContent = m; e.className = 'toast on ' + t;
+  setTimeout(() => e.classList.remove('on'), 3200);
+}
+const om = id => document.getElementById(id).classList.add('on');
+const cm = id => document.getElementById(id).classList.remove('on');
+document.querySelectorAll('.mbg').forEach(b =>
+  b.addEventListener('click', e => { if (e.target === b) b.classList.remove('on'); }));
+
+function mkkey() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const s = () => Array.from({length:4}, () => c[Math.floor(Math.random()*c.length)]).join('');
+  return `NW-${s()}-${s()}-${s()}`;
+}
+function daysLeft(exp) {
+  if (!exp) return null;
+  return Math.ceil((new Date(exp) - new Date()) / 86400000);
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const em  = document.getElementById('lem').value.trim().toLowerCase();
+  const pw  = document.getElementById('lpw').value;
+  const err = document.getElementById('lerr');
+  err.classList.remove('on');
+
+  if (!ADMINS.includes(em)) {
+    err.textContent = 'This email is not registered as an admin.';
+    err.classList.add('on'); return;
+  }
+  const btn = document.getElementById('lbtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  const {data, error} = await sb.auth.signInWithPassword({email:em, password:pw});
+  btn.disabled = false; btn.textContent = 'Sign In →';
+  if (error) { err.textContent = error.message; err.classList.add('on'); return; }
+  launch(em);
+}
+
+async function doOut() {
+  await sb.auth.signOut();
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('scrLogin').classList.add('on');
+}
+
+function launch(email) {
+  document.getElementById('twho').textContent = email;
+  document.getElementById('scrLogin').classList.remove('on');
+  document.getElementById('appShell').style.display = 'flex';
+  loadDB();
+}
+
+document.getElementById('lpw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const {data:{session}} = await sb.auth.getSession();
+  if (session && ADMINS.includes(session.user.email)) launch(session.user.email);
+});
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+const loaders = { db:loadDB, usr:loadUsers, pln:loadPlans };
+function nav(n) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.querySelectorAll('.si').forEach(s => s.classList.remove('on'));
+  document.getElementById('v-'+n).classList.add('on');
+  document.getElementById('n-'+n).classList.add('on');
+  loaders[n]?.();
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDB() {
+  try {
+    // Fetch licenses with plan info
+    const licenses = await sbGet('licenses', {
+      select: 'status,expires_at,user_id,plans(name)',
+    });
+    const downloads = await sbGet('jmx_output_events', { select: 'id' });
+    const profiles  = await sbGet('user_profiles', { select: 'id' });
+
+    const now = new Date();
+    const active   = licenses.filter(l => l.status === 'active' && new Date(l.expires_at) > now).length;
+    const expired  = licenses.filter(l => l.status === 'active' && new Date(l.expires_at) <= now).length;
+    const suspended= licenses.filter(l => l.status === 'suspended').length;
+
+    document.getElementById('s-tot').textContent = profiles.length;
+    document.getElementById('s-act').textContent = active;
+    document.getElementById('s-exp').textContent = expired;
+    document.getElementById('s-sus').textContent = suspended;
+    document.getElementById('s-dl').textContent  = downloads.length;
+
+    // Recent users
+    const recent = await sbGet('user_license_summary', {
+      select: '*', order: 'registered_at.desc', limit: '10'
+    });
+    document.getElementById('recBody').innerHTML = !recent.length
+      ? '<tr class="erow"><td colspan="6">No activity yet</td></tr>'
+      : recent.map(r => `<tr>
+          <td><strong>${[r.first_name,r.last_name].filter(Boolean).join(' ')||'—'}</strong></td>
+          <td>${r.email||'—'}</td>
+          <td>${r.plan_name||'—'}</td>
+          <td>${sbadge(r.status)}</td>
+          <td>${fd(r.expires_at)}</td>
+          <td>${fd(r.last_seen_at)}</td>
+        </tr>`).join('');
+  } catch(e) {
+    toast('Dashboard load failed: ' + e.message, 'err');
+  }
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  document.getElementById('uBody').innerHTML = '<tr class="lrow"><td colspan="10">Loading…</td></tr>';
+  try {
+    const rows = await sbGet('user_license_summary', { select: '*', order: 'registered_at.desc' });
+    allUsers = rows;
+    renderUsers(rows);
+  } catch(e) {
+    toast('Users load failed: ' + e.message, 'err');
+    document.getElementById('uBody').innerHTML = `<tr class="erow"><td colspan="10">${e.message}</td></tr>`;
+  }
+}
+
+function renderUsers(rows) {
+  const now = new Date();
+  document.getElementById('uBody').innerHTML = !rows.length
+    ? '<tr class="erow"><td colspan="10">No users found</td></tr>'
+    : rows.map(r => {
+        const dl = r.expires_at ? daysLeft(r.expires_at) : null;
+        const dlTxt = dl != null ? `<span style="color:${dl<7?'var(--red)':dl<30?'var(--acc)':'var(--grn)'}">${dl}d</span>` : '—';
+        return `<tr>
+          <td><strong>${[r.first_name,r.last_name].filter(Boolean).join(' ')||'—'}</strong></td>
+          <td style="font-size:11px">${r.email||'—'}</td>
+          <td>${r.phone||'—'}</td>
+          <td>${r.plan_name||'—'}</td>
+          <td>${sbadge(r.status)}</td>
+          <td style="font-family:var(--mono);font-size:10px">${r.license_key||'—'}</td>
+          <td>${fd(r.expires_at)}</td>
+          <td>${dlTxt}</td>
+          <td>${fd(r.registered_at)}</td>
+          <td style="white-space:nowrap">
+            ${r.license_id ? `
+              <button class="btn bp xs" onclick="openUpgrade('${r.license_id}','${r.email||''}','${r.first_name||''}','${r.last_name||''}','${r.plan_name||''}')">↑ Upgrade</button>
+              ${r.status==='active' ? `<button class="btn bam xs" onclick="la('${r.license_id}','suspend')">Suspend</button>` : ''}
+              ${r.status!=='active' ? `<button class="btn bg xs" onclick="la('${r.license_id}','activate')">Activate</button>` : ''}
+              <button class="btn br xs" onclick="la('${r.license_id}','revoke')">Revoke</button>
+            ` : '—'}
+          </td>
+        </tr>`;
+      }).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('usrSearch').value.toLowerCase();
+  renderUsers(allUsers.filter(r =>
+    (r.first_name||'').toLowerCase().includes(q) ||
+    (r.last_name||'').toLowerCase().includes(q) ||
+    (r.email||'').toLowerCase().includes(q)
+  ));
+}
+
+async function la(licId, action) {
+  if (action === 'revoke' && !confirm('Revoke this license?')) return;
+  try {
+    const statusMap = { suspend:'suspended', activate:'active', revoke:'revoked' };
+    await sbPatch('licenses', 'id', licId, { status: statusMap[action] });
+    toast(`License ${action}d`, 'ok');
+    loadUsers();
+  } catch(e) {
+    toast('Failed: ' + e.message, 'err');
+  }
+}
+
+// ── Plans ─────────────────────────────────────────────────────────────────────
+async function loadPlans() {
+  try {
+    allPlans = await sbGet('plans', { select: '*', order: 'created_at.asc' });
+    const g = document.getElementById('pGrid');
+    g.innerHTML = !allPlans.length
+      ? '<div style="color:var(--tx3);font-size:12px">No plans yet.</div>'
+      : allPlans.map(p => `
+          <div class="ptile">
+            <div class="ptile-name">${p.name}</div>
+            <div class="ptile-meta">
+              ${p.description||''}<br>
+              <strong>${p.duration_days} days</strong> · <strong>${p.max_devices} device${p.max_devices>1?'s':''}</strong><br>
+              <span style="color:${p.is_active?'var(--grn)':'var(--tx3)'}">
+                ${p.is_active?'● Active':'○ Hidden'}
+              </span>
+            </div>
+          </div>`).join('');
+  } catch(e) {
+    toast('Plans load failed: ' + e.message, 'err');
+  }
+}
+
+async function createPlan() {
+  const name = document.getElementById('pname').value.trim();
+  const desc = document.getElementById('pdesc').value.trim();
+  const days = parseInt(document.getElementById('pdays').value);
+  const devs = parseInt(document.getElementById('pdev').value);
+  if (!name) { toast('Plan name required', 'err'); return; }
+  try {
+    await sbPost('plans', { name, description:desc, duration_days:days, max_devices:devs, is_active:true });
+    toast('Plan created', 'ok');
+    cm('mNewPlan');
+    loadPlans();
+  } catch(e) {
+    toast('Failed: ' + e.message, 'err');
+  }
+}
+
+// ── Upgrade Plan ──────────────────────────────────────────────────────────────
+async function openUpgrade(licId, email, firstName, lastName, currentPlan) {
+  _upgradeTarget = { licId, email, name: [firstName,lastName].filter(Boolean).join(' ')||email };
+
+  if (!allPlans.length) allPlans = await sbGet('plans', { select:'*', is_active:'eq.true' });
+
+  document.getElementById('upgradeUserInfo').innerHTML =
+    `<strong>${_upgradeTarget.name}</strong> &nbsp;·&nbsp; ${email}<br>
+     Current plan: <strong>${currentPlan||'Trial'}</strong>`;
+
+  const sel = document.getElementById('upgradePlan');
+  sel.innerHTML = '<option value="">— Select new plan —</option>' +
+    allPlans.map(p => `<option value="${p.id}" data-d="${p.duration_days}" data-v="${p.max_devices}">
+      ${p.name} — ${p.duration_days} days · ${p.max_devices} device${p.max_devices>1?'s':''}
+    </option>`).join('');
+
+  document.getElementById('upgradeKey').value = mkkey();
+  document.getElementById('upgradeDays').value = '365';
+  document.getElementById('upgradeDevices').value = '1';
+  om('mUpgrade');
+}
+
+function onUpgradePlanChange() {
+  const opt = document.getElementById('upgradePlan').selectedOptions[0];
+  if (opt?.dataset.d) document.getElementById('upgradeDays').value = opt.dataset.d;
+  if (opt?.dataset.v) document.getElementById('upgradeDevices').value = opt.dataset.v;
+}
+
+async function submitUpgrade() {
+  const planId  = document.getElementById('upgradePlan').value;
+  const days    = parseInt(document.getElementById('upgradeDays').value)||365;
+  const devices = parseInt(document.getElementById('upgradeDevices').value)||1;
+  const key     = document.getElementById('upgradeKey').value.trim();
+
+  if (!planId) { toast('Please select a plan', 'err'); return; }
+  if (!key)    { toast('License key required', 'err'); return; }
+
+  const btn = document.getElementById('upgradBtn');
+  btn.disabled = true; btn.textContent = 'Upgrading…';
+
+  try {
+    // Revoke old license
+    await sbPatch('licenses', 'id', _upgradeTarget.licId, { status: 'revoked' });
+
+    // Get user_id from old license
+    const oldLic = await sbGet('licenses', { id: `eq.${_upgradeTarget.licId}`, select: 'user_id' });
+    const uid = oldLic[0]?.user_id;
+
+    const plan = allPlans.find(p => p.id === planId);
+    const expires = new Date();
+    expires.setDate(expires.getDate() + days);
+
+    // Create new license
+    await sbPost('licenses', {
+      user_id:     uid,
+      license_key: key,
+      plan_id:     planId,
+      status:      'active',
+      max_devices: devices,
+      expires_at:  expires.toISOString(),
+      notes:       `Upgraded on ${new Date().toDateString()}`,
+    });
+
+    // Build email template
+    const emailText =
+`To: ${_upgradeTarget.email}
+Subject: Your NestJMXEnhancer License Key
+
+Dear ${_upgradeTarget.name},
+
+Your NestJMXEnhancer account has been upgraded.
+
+License Key:   ${key}
+Plan:          ${plan?.name||'—'}
+Valid Until:   ${expires.toDateString()}
+Max Devices:   ${devices}
+
+How to activate:
+1. Open NestJMXEnhancer
+2. Sign in with your email and password
+3. Enter the license key above when prompted
+4. Click Activate License
+
+For support: connect@nest-works.in
+
+Best regards,
+NestWorks`;
+
+    document.getElementById('upgradeEmailData').textContent = emailText;
+    cm('mUpgrade');
+    om('mUpgradeSuccess');
+    loadUsers();
+    toast('Plan upgraded!', 'ok');
+  } catch(e) {
+    toast('Upgrade failed: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '✓ Upgrade & Generate Key';
+  }
+}
+</script>
+</body>
+</html>
