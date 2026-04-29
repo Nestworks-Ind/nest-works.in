@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NestJMXEnhancer — End-to-End JMeter Scripting & Auto-Correlation Tool</title>
+<meta name="description" content="NestJMXEnhancer automates end-to-end JMeter scripting — auto-correlation, RegexExtractors, Response Assertions, and Think Time. The fastest JMeter autocorrelation tool for enterprise performance engineers."/>
+<link rel="canonical" href="https://nest-works.in/nestjmxenhancer"/>
+<!-- SEO / Open Graph -->
+<meta name="keywords" content="JMeter autocorrelation, JMeter auto correlation, JMeter correlation tool, JMeter scripting tool, RegexExtractor JMeter, JMeter dynamic values, performance testing automation, JMeter JTL analysis, JMeter script optimization, NestJMXEnhancer, NestWorks, JMeter performance engineering"/>
+<meta name="author" content="Sreenu Gali — NestWorks"/>
+<meta name="robots" content="index, follow"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://nest-works.in/nestjmxenhancer"/>
+<meta property="og:title" content="NestJMXEnhancer — End-to-End JMeter Scripting & Auto-Correlation Tool"/>
+<meta property="og:description" content="Automate JMeter correlation in minutes. NestJMXEnhancer identifies dynamic values, generates RegexExtractors, adds assertions and think time — all from your JMX and JTL files. Built for enterprise performance engineers."/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="NestJMXEnhancer — JMeter Autocorrelation Tool"/>
+<meta name="twitter:description" content="End-to-end JMeter scripting automation. Dynamic value detection, RegexExtractors, assertions, and think time — injected automatically from your JMX & JTL files."/>
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "NestJMXEnhancer",
+  "operatingSystem": "Windows",
+  "applicationCategory": "DeveloperApplication",
+  "description": "End-to-end JMeter scripting and autocorrelation tool. Detects dynamic values, generates RegexExtractors, adds Response Assertions and Think Time pauses — all from JMX and JTL files.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Sreenu Gali",
+    "url": "https://www.linkedin.com/in/sreenu-gali-4ba203163/"
+  },
+  "url": "https://nest-works.in/nestjmxenhancer",
+  "keywords": "JMeter autocorrelation, JMeter correlation, performance testing, RegexExtractor, JMeter scripting"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cal+Sans&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#0a0a0a;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-size:15px;line-height:1.6}
+:root{
+  --black:#0a0a0a;
+  --grey1:#f7f7f7;
+  --grey2:#f0f0f0;
+  --grey3:#e4e4e4;
+  --grey4:#a0a0a0;
+  --grey5:#6b6b6b;
+  --grey6:#3a3a3a;
+  --amber:#d97706;
+  --amber-lt:#fef3c7;
+  --amber-mid:#f59e0b;
+  --green:#16a34a;
+  --green-lt:#dcfce7;
+  --red:#dc2626;
+  --red-lt:#fee2e2;
+  --blue:#2563eb;
+  --radius:8px;
+  --radius-lg:12px;
+}
+
+/* ── NAV ── */
+nav#nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:60px;border-bottom:1px solid transparent;transition:border-color .2s,background .2s;background:rgba(255,255,255,0)}
+nav#nav.solid{background:rgba(255,255,255,.97);border-color:var(--grey3);backdrop-filter:blur(12px)}
+nav#nav .nav-w{max-width:1140px;margin:0 auto;padding:0 32px;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{text-decoration:none;display:inline-flex;align-items:center}
+
+.nav-menu{display:flex;align-items:center;gap:2px;list-style:none}
+.nav-menu a{font-size:13px;font-weight:400;color:var(--grey5);text-decoration:none;padding:6px 10px;border-radius:6px;transition:color .15s,background .15s}
+.nav-menu a:hover{color:var(--black);background:var(--grey1)}
+.nav-dl{background:var(--black)!important;color:#fff!important;font-weight:500!important;padding:7px 16px!important;border-radius:7px!important}
+.nav-dl:hover{background:var(--grey6)!important}
+.nav-ham{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:4px}
+.nav-ham span{display:block;width:20px;height:1.5px;background:var(--black);border-radius:2px}
+.mob-overlay{display:none;position:fixed;inset:0;background:#fff;z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+.mob-overlay.open{display:flex}
+.mob-overlay a{font-size:22px;font-weight:500;color:var(--black);text-decoration:none}
+.mob-close{position:absolute;top:18px;right:28px;background:none;border:none;font-size:26px;cursor:pointer;color:var(--black)}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;background:#fff;padding:80px 0 60px;position:relative}
+.hero-noise{position:absolute;inset:0;background-image:radial-gradient(circle at 70% 20%,rgba(245,158,11,.06) 0%,transparent 50%),radial-gradient(circle at 20% 80%,rgba(22,163,74,.04) 0%,transparent 40%);pointer-events:none}
+.hero-w{max-width:1140px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 440px;gap:80px;align-items:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--amber-lt);border:1px solid rgba(217,119,6,.2);border-radius:100px;padding:4px 12px 4px 8px;margin-bottom:28px}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--amber-mid);flex-shrink:0}
+.hero-eyebrow span{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--amber)}
+h1{font-size:clamp(38px,5.5vw,64px);font-weight:600;line-height:1.06;letter-spacing:-.03em;color:var(--black);margin-bottom:20px}
+h1 em{font-style:normal;color:var(--amber)}
+.hero-sub{font-size:17px;color:var(--grey5);font-weight:300;line-height:1.7;max-width:500px;margin-bottom:36px}
+.hero-sub strong{color:var(--grey6);font-weight:500}
+.hero-ai-line{display:flex;align-items:center;gap:10px;padding:13px 16px;border:1px solid var(--grey3);border-left:3px solid var(--amber-mid);border-radius:0 var(--radius) var(--radius) 0;background:var(--grey1);margin-bottom:32px;max-width:500px}
+.hero-ai-line p{font-size:13px;color:var(--grey6);line-height:1.5}
+.hero-ai-line p strong{color:var(--black);font-weight:600}
+.cta-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:44px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--black);color:#fff;padding:13px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:-.01em;transition:background .15s,transform .15s;border:none;cursor:pointer;white-space:nowrap}
+.btn-primary:hover{background:var(--grey6);transform:translateY(-1px)}
+.btn-primary svg{flex-shrink:0}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;color:var(--grey5);font-size:14px;text-decoration:none;padding:13px 20px;border:1px solid var(--grey3);border-radius:8px;transition:color .15s,border-color .15s,background .15s;font-weight:400}
+.btn-secondary:hover{color:var(--black);border-color:var(--grey6);background:var(--grey1)}
+.hero-proof{display:flex;align-items:center;gap:24px;padding-top:24px;border-top:1px solid var(--grey3)}
+.proof-item{display:flex;flex-direction:column;gap:2px}
+.proof-val{font-size:20px;font-weight:600;color:var(--black);letter-spacing:-.02em;line-height:1}
+.proof-lbl{font-size:11px;color:var(--grey4);letter-spacing:.04em;text-transform:uppercase}
+.proof-div{width:1px;height:28px;background:var(--grey3)}
+
+/* hero right — terminal card */
+.hero-card{background:#0f0f0f;border:1px solid #222;border-radius:14px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.12),0 0 0 1px rgba(255,255,255,.04)}
+.hcard-bar{background:#1a1a1a;border-bottom:1px solid #222;padding:12px 16px;display:flex;align-items:center;gap:8px}
+.hcard-dots{display:flex;gap:6px}
+.hcard-dot{width:10px;height:10px;border-radius:50%}
+.hcard-title{font-size:11px;color:#555;letter-spacing:.04em;margin-left:6px;font-family:'SF Mono','JetBrains Mono',monospace}
+.hcard-body{padding:20px}
+.hcard-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 12px;border-radius:6px;margin-bottom:4px}
+.hcard-row.head{background:#161616;border-bottom:1px solid #222;border-radius:6px 6px 0 0;margin-bottom:0}
+.hcard-row.data{background:#141414}
+.hcard-row.data:hover{background:#1c1c1c}
+.hcard-cell{font-size:10.5px;font-family:'SF Mono','JetBrains Mono','Courier New',monospace}
+.hcard-cell.dim{color:#444;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase}
+.hcard-cell.tx{color:#888}
+.hcard-cell.val{color:#f59e0b}
+.hcard-cell.rgx{color:#60a5fa}
+.hcard-badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.badge-ok{background:rgba(22,163,74,.15);color:#4ade80}
+.badge-hdr{background:rgba(59,130,246,.15);color:#93c5fd}
+.hcard-divider{height:1px;background:#1e1e1e;margin:10px 0}
+.hcard-stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.hcard-stat{background:#161616;border-radius:6px;padding:10px 12px;text-align:center}
+.hcard-stat-val{font-family:'SF Mono','JetBrains Mono',monospace;font-size:16px;font-weight:600;color:#f59e0b;line-height:1}
+.hcard-stat-lbl{font-size:9.5px;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+
+/* ── LOGOS / TRUST ── */
+#trust{border-top:1px solid var(--grey3);border-bottom:1px solid var(--grey3);padding:18px 0;background:#fff}
+.trust-w{max-width:1140px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:48px;flex-wrap:wrap;justify-content:center}
+.trust-lbl{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--grey4);white-space:nowrap}
+.trust-items{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--grey4)}
+.trust-item svg{flex-shrink:0;opacity:.5}
+
+/* ── SECTIONS COMMON ── */
+section{padding:96px 0}
+.sec-w{max-width:1140px;margin:0 auto;padding:0 32px}
+.sec-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+.sec-h2{font-size:clamp(26px,3.5vw,42px);font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--black);margin-bottom:16px}
+.sec-sub{font-size:16px;color:var(--grey5);font-weight:300;line-height:1.75;max-width:560px}
+
+/* ── AI COMPARISON ── */
+#compare{background:var(--black)}
+#compare .sec-label{color:var(--amber-mid)}
+#compare .sec-h2{color:#fff}
+#compare .sec-sub{color:rgba(255,255,255,.4)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;margin-top:52px;border-radius:12px;overflow:hidden;border:1px solid #222}
+.compare-col{padding:36px}
+.compare-col.bad{border-right:1px solid #222}
+.compare-col.good{background:#0a0a0a}
+.compare-col-head{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #1e1e1e}
+.compare-col.bad .compare-col-head{color:rgba(248,113,113,.6)}
+.compare-col.good .compare-col-head{color:rgba(74,222,128,.7)}
+.compare-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:22px}
+.compare-row:last-child{margin-bottom:0}
+.compare-icon{width:18px;height:18px;flex-shrink:0;margin-top:2px}
+.compare-text{font-size:13.5px;line-height:1.65;color:rgba(255,255,255,.45)}
+.compare-text b{color:rgba(255,255,255,.8);font-weight:500}
+
+/* ── FEATURES ── */
+#features{background:#fff}
+.feat-header{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;margin-bottom:60px}
+.feat-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.feat-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:5px 12px;border-radius:100px;letter-spacing:.02em}
+.feat-badge.desktop{background:var(--grey1);border:1px solid var(--grey3);color:var(--grey6)}
+.feat-badge.secure{background:var(--green-lt);border:1px solid rgba(22,163,74,.2);color:var(--green)}
+.feat-badge.offline{background:var(--amber-lt);border:1px solid rgba(245,158,11,.2);color:var(--amber)}
+.feat-list{border-top:1px solid var(--grey3)}
+.feat-item{display:grid;grid-template-columns:44px 200px 1fr;gap:0;align-items:stretch;border-bottom:1px solid var(--grey3);transition:background .15s}
+.feat-item:hover{background:var(--grey1)}
+.feat-n{padding:22px 0 22px 4px;font-size:11px;font-weight:500;color:var(--grey3);font-family:'SF Mono','JetBrains Mono',monospace;display:flex;align-items:flex-start;justify-content:center;padding-top:24px}
+.feat-name{padding:20px 20px 20px 0;border-right:1px solid var(--grey3);display:flex;align-items:flex-start;gap:12px}
+.feat-icon{width:32px;height:32px;background:var(--black);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.feat-title{font-size:13.5px;font-weight:500;color:var(--black);line-height:1.35;margin-top:4px}
+.feat-desc{padding:20px 0 20px 24px;font-size:13px;color:var(--grey5);line-height:1.75;display:flex;align-items:center}
+
+/* ── STEPS ── */
+#how{background:var(--grey1)}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--grey3);border:1px solid var(--grey3);border-radius:12px;overflow:hidden;margin-top:52px}
+.step{background:#fff;padding:32px 28px}
+.step-n{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--grey3);font-family:'SF Mono','JetBrains Mono',monospace;margin-bottom:16px}
+.step-icon{width:40px;height:40px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.step-title{font-size:14px;font-weight:600;color:var(--black);margin-bottom:8px;letter-spacing:-.01em}
+.step-desc{font-size:12.5px;color:var(--grey5);line-height:1.7}
+
+/* ── NUMBERS ── */
+#numbers{background:var(--black);padding:72px 0}
+.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#222;border:1px solid #222;border-radius:12px;overflow:hidden}
+.num-cell{background:var(--black);padding:40px 32px}
+.num-val{font-size:42px;font-weight:600;letter-spacing:-.04em;color:#fff;line-height:1;margin-bottom:8px}
+.num-val span{color:var(--amber-mid)}
+.num-lbl{font-size:12px;color:#555;line-height:1.5}
+
+/* ── ABOUT ── */
+#about{background:#fff}
+.about-grid{display:grid;grid-template-columns:300px 1fr;gap:80px;align-items:start}
+.about-card{border:1px solid var(--grey3);border-radius:14px;overflow:hidden;position:sticky;top:80px}
+.about-photo{width:100%;aspect-ratio:1;object-fit:cover;object-position:top center;display:block}
+.about-card-foot{padding:20px 22px 24px}
+.about-name{font-size:17px;font-weight:600;color:var(--black);letter-spacing:-.02em;margin-bottom:2px}
+.about-role{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--grey4);margin-bottom:16px}
+.about-li-btn{display:flex;align-items:center;gap:10px;text-decoration:none;border:1px solid var(--grey3);border-radius:8px;padding:10px 14px;transition:border-color .15s,background .15s}
+.about-li-btn:hover{border-color:var(--grey6);background:var(--grey1)}
+.about-li-btn svg{flex-shrink:0}
+.about-li-text{display:flex;flex-direction:column;gap:1px}
+.about-li-text .lbl{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey4);font-weight:600}
+.about-li-text .val{font-size:12.5px;font-weight:500;color:var(--black)}
+.about-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:14px}
+.about-chip{font-size:10px;background:var(--grey1);border:1px solid var(--grey3);color:var(--grey5);padding:3px 9px;border-radius:4px;font-weight:500}
+.about-content{padding-top:4px}
+.about-content .sec-label{color:var(--grey4)}
+.about-content h2{font-size:clamp(22px,3vw,34px);font-weight:600;letter-spacing:-.03em;line-height:1.15;color:var(--black);margin-bottom:20px}
+.about-content h2 em{font-style:italic;color:var(--amber)}
+.about-content p{font-size:14px;color:var(--grey5);line-height:1.85;margin-bottom:14px}
+.about-content p strong{color:var(--black);font-weight:500}
+.about-quote{border-left:2px solid var(--amber-mid);padding:14px 18px;background:var(--grey1);margin:24px 0;border-radius:0 6px 6px 0}
+.about-quote p{font-size:13.5px;color:var(--grey6);line-height:1.7;font-style:italic;margin:0}
+
+/* ── DOWNLOAD ── */
+#download{background:var(--grey1)}
+.dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.dl-cards{display:flex;flex-direction:column;gap:10px}
+.dl-card{background:#fff;border:1px solid var(--grey3);border-radius:10px;padding:20px;display:flex;align-items:center;gap:16px;transition:border-color .15s,box-shadow .15s}
+.dl-card:hover{border-color:var(--grey6);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.dl-os-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.dl-os-icon.win{background:#eff6ff}
+.dl-os-icon.mac{background:var(--grey2)}
+.dl-info{flex:1;min-width:0}
+.dl-platform{font-size:14px;font-weight:600;color:var(--black);margin-bottom:2px}
+.dl-meta{font-size:11.5px;color:var(--grey4)}
+.dl-action-btn{display:inline-flex;align-items:center;gap:6px;background:var(--black);color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:500;white-space:nowrap;transition:background .15s;flex-shrink:0}
+.dl-action-btn:hover{background:var(--grey6)}
+.dl-soon{font-size:11px;color:var(--grey4);font-weight:500;flex-shrink:0}
+.setup-head{margin-bottom:20px}
+.setup-head .sec-label{color:var(--grey4)}
+.setup-head h3{font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--black);margin-top:6px;margin-bottom:4px}
+.setup-head p{font-size:13px;color:var(--grey5)}
+.setup-list{display:flex;flex-direction:column}
+.setup-row{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--grey3)}
+.setup-row:last-child{border-bottom:none}
+.setup-num{width:28px;height:28px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}
+.setup-title{font-size:13px;font-weight:500;color:var(--black);margin-bottom:3px}
+.setup-desc{font-size:12px;color:var(--grey5);line-height:1.6}
+.setup-desc a{color:var(--black);font-weight:500}
+
+/* ── FOOTER ── */
+footer{background:var(--black);padding:40px 0 28px;border-top:1px solid #1a1a1a}
+.footer-w{max-width:1140px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{display:inline-flex;align-items:center}
+
+.footer-nav{display:flex;gap:2px}
+.footer-nav a{font-size:12px;color:rgba(255,255,255,.3);text-decoration:none;padding:5px 10px;border-radius:4px;transition:color .15s}
+.footer-nav a:hover{color:rgba(255,255,255,.7)}
+.footer-copy{font-size:11.5px;color:rgba(255,255,255,.2)}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .nav-menu{display:none}
+  .nav-ham{display:flex}
+  .hero-w{grid-template-columns:1fr;gap:48px;padding-top:40px}
+  .hero-card{max-width:480px}
+  .compare-grid{grid-template-columns:1fr}
+  .compare-col.bad{border-right:none;border-bottom:1px solid #222}
+  .feat-header{grid-template-columns:1fr}
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .numbers-grid{grid-template-columns:1fr 1fr}
+  .about-grid{grid-template-columns:1fr}
+  .about-card{position:static;max-width:320px}
+  .dl-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .steps-grid{grid-template-columns:1fr}
+  .numbers-grid{grid-template-columns:1fr 1fr}
+  .hero-proof{gap:16px}
+  .proof-div{display:none}
+  h1{letter-spacing:-.025em}
+  section{padding:64px 0}
+  .feat-item{grid-template-columns:36px 1fr}
+  .feat-desc{display:none}
+  .feat-name{border-right:none;grid-column:2}
+}
+
+/* ── HOW IT WORKS — screenshot steps ── */
+.how-step{display:grid;grid-template-columns:320px 1fr;gap:64px;align-items:center;margin-bottom:80px}
+.how-step-rev{direction:rtl}
+.how-step-rev > *{direction:ltr}
+.how-step-meta{display:flex;flex-direction:column;gap:16px}
+.how-step-num{font-size:72px;font-weight:700;letter-spacing:-.04em;color:var(--grey3);line-height:1;margin-bottom:4px}
+.how-step-title{font-size:22px;font-weight:600;color:var(--black);letter-spacing:-.02em;margin-bottom:10px;line-height:1.2}
+.how-step-desc{font-size:14px;color:var(--grey5);line-height:1.75}
+.how-step-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.how-chip{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;background:var(--grey2);color:var(--grey6);border:1px solid var(--grey3);letter-spacing:.02em}
+.how-chip-green{background:var(--green-lt);color:var(--green);border-color:rgba(22,163,74,.2)}
+.how-chip-amber{background:var(--amber-lt);color:var(--amber);border-color:rgba(217,119,6,.2)}
+.how-step-screen{border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.1),0 0 0 1px var(--grey3);background:#fff}
+.how-screen-bar{background:#f5f5f5;border-bottom:1px solid var(--grey3);padding:10px 14px;display:flex;gap:6px}
+.how-screen-bar span{display:block;width:10px;height:10px;border-radius:50%;background:var(--grey3)}
+.how-screen-bar span:nth-child(1){background:#ff5f56}
+.how-screen-bar span:nth-child(2){background:#ffbd2e}
+.how-screen-bar span:nth-child(3){background:#27c93f}
+.how-step-screen img{width:100%;display:block}
+@media(max-width:900px){
+  .how-step,.how-step-rev{grid-template-columns:1fr;direction:ltr}
+  .how-step-num{font-size:48px}
+}
+
+
+@media(min-width:481px){
+  .nav-menu{display:flex!important;visibility:visible!important}
+  .nav-ham{display:none!important}
+}
+
+/* ── MOBILE POLISH ── */
+@media(max-width:480px){
+  .sec-w{padding:0 20px}
+  .nav-w{padding:0 20px}
+  .footer-w{padding:0 20px;flex-direction:column;align-items:flex-start;gap:12px}
+  .footer-links{flex-wrap:wrap}
+  .cta-row{flex-direction:column;align-items:flex-start}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center}
+  .dl-card{flex-direction:column;gap:10px}
+  .hero-proof{gap:12px;flex-wrap:wrap}
+  .proof-div{display:none}
+  svg[width="170"]{width:140px}
+}
+* { -webkit-tap-highlight-color: transparent; }
+
+
+/* ── CONTACT SECTION ── */
+#contact{background:var(--black);padding:80px 0}
+.contact-inner{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.contact-left .sec-label{color:var(--amber-mid)}
+.contact-left .sec-h2{color:#fff;margin-bottom:12px}
+.contact-tagline{font-size:14px;color:rgba(255,255,255,.4);line-height:1.8;max-width:380px}
+.contact-channels{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.c-channel{display:flex;align-items:center;gap:16px;padding:16px 20px;border:1px solid rgba(255,255,255,.08);border-radius:10px;text-decoration:none;transition:border-color .15s,background .15s}
+.c-channel:hover{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.04)}
+.c-icon{font-size:22px;flex-shrink:0}
+.c-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:3px}
+.c-val{font-size:14px;font-weight:500;color:#fff}
+.contact-right{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:32px}
+.cr-title{font-size:14px;font-weight:600;color:rgba(255,255,255,.8);margin-bottom:6px}
+.cr-sub{font-size:12px;color:rgba(255,255,255,.3);margin-bottom:24px;line-height:1.6}
+.cf-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.cf-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.cf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 14px;font-size:13px;color:#fff;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+.cf-input::placeholder{color:rgba(255,255,255,.2)}
+.cf-input:focus{border-color:rgba(245,158,11,.4)}
+.cf-btn{width:100%;background:var(--amber-mid);color:var(--black);border:none;border-radius:8px;padding:13px 24px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px;letter-spacing:-.01em}
+.cf-btn:hover{background:#fbbf24}
+@media(max-width:860px){.contact-inner{grid-template-columns:1fr;gap:40px}}
+
+</style>
+</head>
+<body>
+
+<div class="mob-overlay" id="mob">
+  <button class="mob-close" onclick="closeMob()">&#215;</button>
+  <a href="#hero" onclick="closeMob()">Home</a>
+  <a href="#features" onclick="closeMob()">Features</a>
+  <a href="#how" onclick="closeMob()">How it works</a>
+  <a href="#about" onclick="closeMob()">About</a>
+  <a href="#contact" onclick="closeMob()">Contact</a>
+  <a href="#download" onclick="closeMob()">Download</a>
+</div>
+
+<nav id="nav">
+  <div class="nav-w">
+    <a class="nav-logo" href="#hero" style="display:inline-flex;align-items:center;line-height:1"><svg width="170" height="40" viewBox="0 0 170 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#0a0a0a"/><path d="M8,9 L8,27 L15,9 L15,27" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18,9 L23,27 L27,17 L31,27 L36,9" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="50" y="26" font-family="system-ui,sans-serif" font-size="19" font-weight="600" fill="#0a0a0a" letter-spacing="-.03em">Nest<tspan fill="#d97706">Works</tspan></text></svg></a>
+    <ul class="nav-menu">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact" style="font-size:13px;font-weight:400;color:var(--grey5);text-decoration:none;padding:6px 10px;border-radius:6px;transition:color .15s,background .15s">Contact</a></li>
+      <li><a href="#download" class="nav-dl">Download Free</a></li>
+    </ul>
+    <button class="nav-ham" onclick="openMob()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-w">
+    <div>
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-dot"></div>
+        <span>The NestJMXEnhancer</span>
+      </div>
+
+      <h1>End-to-end<br>JMeter scripting,<br><em>automated.</em></h1>
+
+      <p class="hero-sub">
+        NestJMXEnhancer reads your JMeter JMX and JTL files directly and produces a <strong>fully correlated, production-ready script</strong> in minutes. Dynamic values identification, RegexExtractors, assertions, and think time — all injected automatically.
+      </p>
+
+      <div class="hero-ai-line">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><polygon points="8,1.5 10,6 14.5,6.5 11.2,9.5 12.2,14 8,11.5 3.8,14 4.8,9.5 1.5,6.5 6,6"/></svg>
+        <p><strong>Faster than AI. More accurate than AI.</strong> Built by a performance engineer who actually needed it.</p>
+      </div>
+
+      <div class="cta-row">
+        <a href="#download" class="btn-primary" onclick="logDownload('windows')">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7.5 2v8M5 7.5l2.5 2.5 2.5-2.5M2.5 12h10"/></svg>
+          Download Free — Windows
+        </a>
+        <a href="#features" class="btn-secondary">
+          See all features
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 6.5h9M8 3.5l3 3-3 3"/></svg>
+        </a>
+      </div>
+
+      <div class="hero-proof">
+        <div class="proof-item">
+          <span class="proof-val">4h&thinsp;&rarr;&thinsp;10m</span>
+          <span class="proof-lbl">Per script</span>
+        </div>
+        <div class="proof-div"></div>
+        <div class="proof-item">
+          <span class="proof-val">100%</span>
+          <span class="proof-lbl">Deterministic</span>
+        </div>
+        <div class="proof-div"></div>
+        <div class="proof-item">
+          <span class="proof-val">0 bytes</span>
+          <span class="proof-lbl">Data transmitted</span>
+        </div>
+        <div class="proof-div"></div>
+        <div class="proof-item">
+          <span class="proof-val">Desktop</span>
+          <span class="proof-lbl">No cloud needed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- terminal card -->
+    <div class="hero-card reveal">
+      <div class="hcard-bar">
+        <div class="hcard-dots">
+          <div class="hcard-dot" style="background:#ff5f56"></div>
+          <div class="hcard-dot" style="background:#ffbd2e"></div>
+          <div class="hcard-dot" style="background:#27c93f"></div>
+        </div>
+        <span class="hcard-title">nestjmxenhancer &mdash; analysis complete</span>
+      </div>
+      <div class="hcard-body">
+        <div class="hcard-row head">
+          <div class="hcard-cell dim">parameter</div>
+          <div class="hcard-cell dim">status</div>
+        </div>
+        <div class="hcard-row data">
+          <div><span class="hcard-cell tx">JSESSIONID</span><br><span class="hcard-cell rgx" style="font-size:9px">JSESSIONID=([^;]+)</span></div>
+          <span class="hcard-badge badge-ok">&#x2713; injected</span>
+        </div>
+        <div class="hcard-row data">
+          <div><span class="hcard-cell tx">csrf_token</span><br><span class="hcard-cell rgx" style="font-size:9px">csrf_token&quot;:&quot;([^&quot;]+)</span></div>
+          <span class="hcard-badge badge-ok">&#x2713; injected</span>
+        </div>
+        <div class="hcard-row data">
+          <div><span class="hcard-cell tx">X-Auth-Token</span><br><span class="hcard-cell rgx" style="font-size:9px">X-Auth-Token: ([^
+]+)</span></div>
+          <span class="hcard-badge badge-hdr">&#x2713; header</span>
+        </div>
+        <div class="hcard-row data">
+          <div><span class="hcard-cell tx">policy_id</span><br><span class="hcard-cell rgx" style="font-size:9px">&quot;policyId&quot;:&quot;([^&quot;]+)</span></div>
+          <span class="hcard-badge badge-ok">&#x2713; injected</span>
+        </div>
+        <div class="hcard-row data">
+          <div><span class="hcard-cell tx">transaction_ref</span><br><span class="hcard-cell rgx" style="font-size:9px">txRef=([^&amp;]+)</span></div>
+          <span class="hcard-badge badge-ok">&#x2713; injected</span>
+        </div>
+        <div class="hcard-divider"></div>
+        <div class="hcard-stat-row">
+          <div class="hcard-stat">
+            <div class="hcard-stat-val">24</div>
+            <div class="hcard-stat-lbl">correlations</div>
+          </div>
+          <div class="hcard-stat">
+            <div class="hcard-stat-val">4h &rarr; 9m</div>
+            <div class="hcard-stat-lbl">time saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div id="trust">
+  <div class="trust-w">
+    <span class="trust-lbl">Built for</span>
+    <div class="trust-items">
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="2" width="12" height="9" rx="1.5"/><path d="M4 11v1.5M10 11v1.5M3 12.5h8"/></svg>
+        Desktop application
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 3 11l.5-3.5L1 5l3.5-.5z"/></svg>
+        Zero data stored or transmitted
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M4.5 7l2 2 3-3"/></svg>
+        Windows &bull; macOS coming soon
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/><circle cx="7" cy="7" r="3"/></svg>
+        11 years performance engineering
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI COMPARISON -->
+<section id="compare">
+  <div class="sec-w">
+    <div class="reveal">
+      <p class="sec-label">The real difference</p>
+      <h2 class="sec-h2" style="color:#fff">AI can&rsquo;t do this.<br>NestJMXEnhancer can.</h2>
+      <p class="sec-sub">AI tools are impressive for many things. JMeter correlation at enterprise scale is not one of them.</p>
+    </div>
+    <div class="compare-grid reveal">
+      <div class="compare-col bad">
+        <div class="compare-col-head">&#x2715;&ensp;AI tools</div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M6 12l6-6M12 12L6 6"/></svg>
+          <p class="compare-text">Cannot read JMX or JTL files — you <b>paste content manually</b>, and large scripts get truncated</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M6 12l6-6M12 12L6 6"/></svg>
+          <p class="compare-text"><b>Hallucinates extractors</b> — same input, different output every run. You can't trust results</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M6 12l6-6M12 12L6 6"/></svg>
+          <p class="compare-text">Falls apart past 20–30 requests. <b>Enterprise scripts are completely beyond its reach</b></p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M6 12l6-6M12 12L6 6"/></svg>
+          <p class="compare-text">No understanding of JMeter&rsquo;s XML — <b>extractors injected in wrong samplers</b>, scripts break</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M6 12l6-6M12 12L6 6"/></svg>
+          <p class="compare-text"><b>Your confidential test data sent to external servers.</b> Scripts leave your environment</p>
+        </div>
+      </div>
+      <div class="compare-col good">
+        <div class="compare-col-head">&#x2713;&ensp;NestJMXEnhancer</div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9.5l2.5 2.5 4.5-5"/></svg>
+          <p class="compare-text">Reads your <b>actual JMX and JTL files directly</b> — no copy-pasting, no size limits, no truncation</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9.5l2.5 2.5 4.5-5"/></svg>
+          <p class="compare-text"><b>100% deterministic</b> — same input, same validated output. Every single time, without exception</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9.5l2.5 2.5 4.5-5"/></svg>
+          <p class="compare-text"><b>Built for enterprise scale</b> — handles hundreds of samplers with zero degradation or missed values</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9.5l2.5 2.5 4.5-5"/></svg>
+          <p class="compare-text">Deep JMeter XML knowledge — <b>every extractor placed in the exact correct sampler</b>, body or header</p>
+        </div>
+        <div class="compare-row">
+          <svg class="compare-icon" viewBox="0 0 18 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M5.5 9.5l2.5 2.5 4.5-5"/></svg>
+          <p class="compare-text"><b>Runs entirely on your machine.</b> Zero data transmitted. No cloud. No subscription required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="sec-w">
+    <div class="feat-header reveal">
+      <div>
+        <p class="sec-label">What it does</p>
+        <h2 class="sec-h2">Everything needed for production&#8209;ready JMeter scripts.</h2>
+        <p class="sec-sub" style="font-size:14px">One analysis run. Every correlation, assertion, and timer — automated. No manual steps.</p>
+      </div>
+      <div>
+        <p style="font-size:13.5px;color:var(--grey5);line-height:1.8;margin-bottom:18px">NestJMXEnhancer is a <strong style="color:var(--black);font-weight:500">native desktop application</strong> — installed on your Windows machine, runs completely offline. No subscription. No cloud infrastructure. No data ever leaves your machine.</p>
+        <div class="feat-badges">
+          <span class="feat-badge desktop">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="1.5" width="10" height="7" rx="1"/><path d="M3.5 8.5v1.5M8.5 8.5v1.5M2.5 10h7"/></svg>
+            Desktop app
+          </span>
+          <span class="feat-badge secure">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 5.5l3.5 3.5 5-5"/></svg>
+            Zero data stored
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="feat-list reveal">
+      <div class="feat-item">
+        <span class="feat-n">01</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3.5 3.5"/></svg></div><span class="feat-title">Dynamic value detection</span></div>
+        <div class="feat-desc">Compares two recordings to automatically identify session tokens, CSRF tokens, IDs, and timestamps that change between runs.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">02</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="2"/><path d="M7.5 2v2M7.5 11v2M2 7.5h2M11 7.5h2"/></svg></div><span class="feat-title">RegexExtractor injection</span></div>
+        <div class="feat-desc">Generates accurate regex patterns with left-anchor context and injects RegexExtractor elements into the correct sampler — body or header.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">03</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M4.5 7.5l2 2 3.5-3.5"/></svg></div><span class="feat-title">Response assertions</span></div>
+        <div class="feat-desc">Adds a ResponseAssertion to every TransactionController — regex-based where extractors exist, body content for the rest.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">04</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="8.5" r="5"/><path d="M7.5 5.5v3l2 2M5.5 2h4"/></svg></div><span class="feat-title">Think time injection</span></div>
+        <div class="feat-desc">Inserts FlowControlAction pauses between transactions via a single variable — change one value to control all pauses instantly.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">05</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="4" width="13" height="8" rx="1"/><path d="M1 6l6.5 3.5L14 6"/></svg></div><span class="feat-title">Header extraction</span></div>
+        <div class="feat-desc">Detects dynamic values in response headers (Set-Cookie, X-Auth-Token) and sets useHeaders=true automatically.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">06</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><path d="M2 4.5h11M2 7.5h8M2 10.5h5"/><path d="M12 9l2 2-2 2"/></svg></div><span class="feat-title">Advanced correlation writing</span></div>
+        <div class="feat-desc">Implements grouping and match number logic when writing RegexExtractors — handles complex multi-occurrence values accurately.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">07</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><circle cx="7.5" cy="7.5" r="2.5"/></svg></div><span class="feat-title">Smart request matching</span></div>
+        <div class="feat-desc">Matches requests between recordings by URL structure and body similarity — handles JMeter's numeric sampler names correctly.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">08</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><path d="M2 7.5h11M9.5 4l4 3.5-4 3.5"/></svg></div><span class="feat-title">Regex validation</span></div>
+        <div class="feat-desc">Validates every generated regex against the actual response body before injecting — extractors are guaranteed to work before you open JMeter.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">09</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="11" height="11" rx="1.5"/><path d="M2 5.5h11"/><path d="M5.5 2v3M9.5 2v3"/></svg></div><span class="feat-title">Encoded response support</span></div>
+        <div class="feat-desc">Handles JTL validation when responses are encoded — no correlations missed due to encoding format.</div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-n">10</span>
+        <div class="feat-name"><div class="feat-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="5.5" height="5.5" rx="1"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1"/></svg></div><span class="feat-title">Multi-platform app support</span></div>
+        <div class="feat-desc">Works across Java, Python, and .NET applications — handles response structure differences without any manual configuration.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="sec-w">
+    <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 64px">
+      <p class="sec-label" style="color:var(--grey4)">How it works</p>
+      <h2 class="sec-h2">From raw recordings to<br><em>production-ready JMX</em> in minutes.</h2>
+      <p class="sec-sub" style="margin:0 auto;font-size:14px">Five steps. Real UI. No guessing.</p>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="how-step reveal">
+      <div class="how-step-meta">
+        <div class="how-step-num">01</div>
+        <div>
+          <div class="how-step-title">Upload Your Recordings</div>
+          <p class="how-step-desc">Record 2 scripts with same flow — transaction names and count must match exactly. Drop in two JMX scripts and their JTL result files, one pair per recording. NestJMXEnhancer detects dynamic values across both runs and prepares them for analysis.</p>
+          <div class="how-step-chips">
+            <span class="how-chip">2× JMX</span>
+            <span class="how-chip">2× JTL</span>
+            <span class="how-chip">Drag &amp; drop</span>
+          </div>
+        </div>
+      </div>
+      <div class="how-step-screen">
+        <div class="how-screen-bar"><span></span><span></span><span></span></div>
+        <img src="images/screen1.jpg" alt="Step 1 – Upload recordings" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="how-step how-step-rev reveal">
+      <div class="how-step-meta">
+        <div class="how-step-num">02</div>
+        <div>
+          <div class="how-step-title">Configure Your Analysis</div>
+          <p class="how-step-desc">Optionally scope which requests to scan, exclude third-party CDN domains, and enable Response Assertions or Think Time pauses — all settings are optional, defaults work out of the box.</p>
+          <div class="how-step-chips">
+            <span class="how-chip">Request Filter</span>
+            <span class="how-chip">Domain Exclusions</span>
+            <span class="how-chip">Assertions</span>
+            <span class="how-chip">Think Time</span>
+          </div>
+        </div>
+      </div>
+      <div class="how-step-screen">
+        <div class="how-screen-bar"><span></span><span></span><span></span></div>
+        <img src="images/screen2.jpg" alt="Step 2 – Configure analysis" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="how-step reveal">
+      <div class="how-step-meta">
+        <div class="how-step-num">03</div>
+        <div>
+          <div class="how-step-title">Review Correlation Results</div>
+          <p class="how-step-desc">The engine surfaces every dynamic value — session tokens, CSRF values, member IDs, claim numbers — with the exact regex, the origin request, and correlation status. No black box. Full visibility.</p>
+          <div class="how-step-chips">
+            <span class="how-chip">17 Diffs Found</span>
+            <span class="how-chip how-chip-green">4 Correlated</span>
+            <span class="how-chip">Regex preview</span>
+          </div>
+        </div>
+      </div>
+      <div class="how-step-screen">
+        <div class="how-screen-bar"><span></span><span></span><span></span></div>
+        <img src="images/screen3.jpg" alt="Step 3 – Review results" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="how-step how-step-rev reveal">
+      <div class="how-step-meta">
+        <div class="how-step-num">04</div>
+        <div>
+          <div class="how-step-title">Select &amp; Apply Correlations</div>
+          <p class="how-step-desc">Check the correlations you need — or Select All — then click <strong>Apply &amp; Export JMX</strong>. The tool writes RegexExtractors, Response Assertions, and Think Time pauses directly into your script.</p>
+          <div class="how-step-chips">
+            <span class="how-chip">Select all or pick</span>
+            <span class="how-chip how-chip-amber">Apply &amp; Export JMX</span>
+          </div>
+        </div>
+      </div>
+      <div class="how-step-screen">
+        <div class="how-screen-bar"><span></span><span></span><span></span></div>
+        <img src="images/screen4.jpg" alt="Step 4 – Apply correlations" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="how-step reveal">
+      <div class="how-step-meta">
+        <div class="how-step-num">05</div>
+        <div>
+          <div class="how-step-title">Download &amp; Run in JMeter</div>
+          <p class="how-step-desc">Assertions and timers confirmed — click <strong>Download JMX</strong>. Your production-ready correlated script is ready to open in JMeter and execute. No post-processing. No manual edits needed.</p>
+          <div class="how-step-chips">
+            <span class="how-chip how-chip-green">Assertions added</span>
+            <span class="how-chip how-chip-green">Timers inserted</span>
+            <span class="how-chip how-chip-amber">Download JMX</span>
+          </div>
+        </div>
+      </div>
+      <div class="how-step-screen">
+        <div class="how-screen-bar"><span></span><span></span><span></span></div>
+        <img src="images/screen5.jpg" alt="Step 5 – Download JMX" loading="lazy"/>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section id="numbers">
+  <div class="sec-w">
+    <div class="numbers-grid reveal">
+      <div class="num-cell">
+        <div class="num-val">4h<span>&thinsp;&rarr;&thinsp;10m</span></div>
+        <div class="num-lbl">Correlation time per script,<br>down from hours to minutes</div>
+      </div>
+      <div class="num-cell">
+        <div class="num-val"><span>40+</span></div>
+        <div class="num-lbl">Enterprise clients supported<br>across USA insurance &amp; retirement</div>
+      </div>
+      <div class="num-cell">
+        <div class="num-val"><span>11</span> yrs</div>
+        <div class="num-lbl">Performance engineering experience<br>behind every design decision</div>
+      </div>
+      <div class="num-cell">
+        <div class="num-val"><span>0</span></div>
+        <div class="num-lbl">Bytes of your data ever<br>transmitted or stored</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec-w">
+    <div class="about-grid">
+      <div class="about-card reveal">
+        <img class="about-photo" src="data:image/png;base64,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" alt="Sreenu Gali — Performance Engineer"/>
+        <div class="about-card-foot">
+          <div class="about-name">Sreenu Gali</div>
+          <div class="about-role">Performance Engineer &middot; NestWorks</div>
+          <a class="about-li-btn" href="https://www.linkedin.com/in/sreenu-gali-4ba203163/" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0a66c2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            <div class="about-li-text">
+              <span class="lbl">LinkedIn</span>
+              <span class="val">Sreenu Gali</span>
+            </div>
+          </a>
+          <div class="about-chips" style="display:none">
+          </div>
+        </div>
+      </div>
+
+      <div class="about-content reveal">
+        <p class="sec-label">About the creator</p>
+        <h2>Built by the engineer who got tired of doing this <em>by hand.</em></h2>
+        <p>I&rsquo;m <strong>Sreenu Gali</strong> — a performance engineer with over 11 years of hands-on experience across enterprise insurance, retirement, and financial platforms. I&rsquo;ve led performance engineering teams, managed 40+ client relationships, and built testing strategies for some of the largest platforms in the USA.</p>
+        <p>In every single engagement, the same hours were lost to manual correlation. Session tokens. CSRF values. Auth headers. One by one, by hand, every time. It didn&rsquo;t matter which tool, which client, or which platform — the bottleneck was always the same.</p>
+        <div class="about-quote">
+          <p>&ldquo;I built NestJMXEnhancer because I needed it myself — and because no existing tool did it properly at scale. Not even AI.&rdquo;</p>
+        </div>
+        <p>NestWorks is not a company. It&rsquo;s my personal initiative to build desktop products that performance engineers actually need. <strong>Desktop-first. Zero cloud costs. No data leaving your machine.</strong> Your workstation is already powerful enough. The products just needed to exist.</p>
+        <a href="https://nest-works.in" target="_blank" rel="noopener" style="font-size:13px;font-weight:500;color:var(--black);text-decoration:none;display:inline-flex;align-items:center;gap:5px;margin-top:4px;border-bottom:1px solid var(--grey3);padding-bottom:2px">More about NestWorks &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="sec-w">
+    <div class="dl-grid">
+      <div class="reveal">
+        <p class="sec-label" style="color:var(--grey4)">Download</p>
+        <h2 class="sec-h2" style="margin-bottom:10px">Get NestJMXEnhancer<br>free today.</h2>
+        <p style="font-size:14px;color:var(--grey5);margin-bottom:32px;line-height:1.7">Start with a free trial. No credit card required. No account needed to download.</p>
+        <div class="dl-cards">
+          <div class="dl-card">
+            <div class="dl-os-icon win">&#x1F5A5;</div>
+            <div class="dl-info">
+              <div class="dl-platform">Windows</div>
+              <div class="dl-meta">Windows 10 / 11 &middot; 64-bit &middot; Standalone installer</div>
+            </div>
+            <a href="https://github.com/Nestworks-Ind/nestjmxenhancer/releases/download/v1.0.20/NestJMXEnhancer-Windows.zip" class="dl-action-btn" onclick="logDownload('windows')">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 1.5v7M4 6.5l2.5 2.5 2.5-2.5M1.5 11h10"/></svg>
+              Download .zip
+            </a>
+          </div>
+          <div class="dl-card" style="opacity:.5">
+            <div class="dl-os-icon mac">&#x1F34E;</div>
+            <div class="dl-info">
+              <div class="dl-platform">macOS</div>
+              <div class="dl-meta">macOS 12+ &middot; Apple Silicon &amp; Intel &middot; Coming soon</div>
+            </div>
+            <span class="dl-soon">Coming soon</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="setup-head">
+          <p class="sec-label" style="color:var(--grey4)">Setup guide</p>
+          <h3>Up and running in 4 steps</h3>
+          <p>No IT team. No cloud account. No complexity.</p>
+        </div>
+        <div class="setup-list">
+          <div class="setup-row"><div class="setup-num">1</div><div><div class="setup-title">Download and extract</div><p class="setup-desc">Click Download above. Right-click the .zip &rarr; Extract All. The .exe installer is inside.</p></div></div>
+          <div class="setup-row"><div class="setup-num">2</div><div><div class="setup-title">Run the installer</div><p class="setup-desc">Double-click the .exe and follow the setup wizard — creates a Desktop shortcut automatically.</p></div></div>
+          <div class="setup-row"><div class="setup-num">3</div><div><div class="setup-title">Launch the app</div><p class="setup-desc">Double-click the Desktop shortcut. The app opens in its own native window — no browser needed.</p></div></div>
+          <div class="setup-row"><div class="setup-num">4</div><div><div class="setup-title">Create your free account and start</div><p class="setup-desc">Sign up inside the app. Upload two JMX + JTL pairs, run analysis, export your script. <a href="mailto:connect@nest-works.in">Need help?</a></p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="sec-w">
+    <div class="contact-inner">
+      <div class="contact-left reveal">
+        <p class="sec-label">Contact</p>
+        <h2 class="sec-h2">Questions about<br>NestJMXEnhancer?</h2>
+        <p class="contact-tagline">Whether you need help setting up, have a feature request, or want to report a bug — reach out directly. Fastest response on WhatsApp.</p>
+        <div class="contact-channels">
+          <a href="https://wa.me/919963690100" class="c-channel" target="_blank" rel="noopener">
+            <div class="c-icon">💬</div>
+            <div>
+              <div class="c-label">WhatsApp — fastest</div>
+              <div class="c-val">+91 99636 90100</div>
+            </div>
+          </a>
+          <a href="mailto:connect@nest-works.in" class="c-channel">
+            <div class="c-icon">✉️</div>
+            <div>
+              <div class="c-label">Email</div>
+              <div class="c-val">connect@nest-works.in</div>
+            </div>
+          </a>
+          <a href="https://nest-works.in" class="c-channel" target="_blank" rel="noopener">
+            <div class="c-icon">🌐</div>
+            <div>
+              <div class="c-label">Website</div>
+              <div class="c-val">nest-works.in</div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="contact-right reveal">
+        <div class="cr-title">Send a message</div>
+        <div class="cr-sub">Tell us what you need — we'll get back to you on WhatsApp.</div>
+        <div class="cf-group">
+          <label class="cf-label">Your Name</label>
+          <input class="cf-input" type="text" id="cf-name" placeholder="Your name"/>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Phone / WhatsApp</label>
+          <input class="cf-input" type="tel" id="cf-phone" placeholder="+91 98765 43210"/>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Message</label>
+          <textarea class="cf-input" id="cf-msg" placeholder="Describe your question or issue..." style="resize:none;min-height:80px"></textarea>
+        </div>
+        <button class="cf-btn" onclick="sendContactWA()">Send via WhatsApp →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-w">
+    <span class="footer-logo" style="display:inline-flex;align-items:center"><svg width="170" height="40" viewBox="0 0 170 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#0a0a0a"/><path d="M8,9 L8,27 L15,9 L15,27" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18,9 L23,27 L27,17 L31,27 L36,9" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="50" y="26" font-family="system-ui,sans-serif" font-size="19" font-weight="600" fill="#fff" letter-spacing="-.03em">Nest<tspan fill="#f59e0b">Works</tspan></text></svg></span>
+    <div class="footer-nav">
+      <a href="#hero">Home</a>
+      <a href="#features">Products</a>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+    </div>
+    <span class="footer-copy">&copy; 2025 NestWorks &middot; Made in India</span>
+  </div>
+</footer>
+
+<script>
+// Contact WhatsApp form
+function sendContactWA() {
+  var n = document.getElementById('cf-name').value.trim();
+  var p = document.getElementById('cf-phone').value.trim();
+  var m = document.getElementById('cf-msg').value.trim();
+  var msg = 'Hi NestWorks 👋\n\nProduct: NestJMXEnhancer\n';
+  if (n) msg += 'Name: ' + n + '\n';
+  if (p) msg += 'Phone: ' + p + '\n';
+  if (m) msg += '\n' + m;
+  window.open('https://wa.me/919963690100?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Nav scroll effect
+var _nav = document.getElementById('nav');
+if (_nav) {
+  window.addEventListener('scroll', function() {
+    _nav.classList.toggle('solid', window.scrollY > 40);
+  });
+}
+
+// Mobile menu functions
+function openMob() {
+  var mob = document.getElementById('mob');
+  if (mob) { mob.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeMob() {
+  var mob = document.getElementById('mob');
+  if (mob) { mob.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+// Reveal animations
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e, i) {
+    if (e.isIntersecting) {
+      setTimeout(function() { e.target.classList.add('in'); }, i * 70);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+
+// Smooth scroll for all #hash links
+document.addEventListener('click', function(e) {
+  // Walk up DOM tree to find the anchor tag
+  var node = e.target;
+  var a = null;
+  while (node && node !== document) {
+    if (node.tagName === 'A') { a = node; break; }
+    node = node.parentNode;
+  }
+  if (!a) return;
+  var href = a.getAttribute('href');
+  // Only handle pure hash links on this page
+  if (href && href.charAt(0) === '#' && href.length > 1) {
+    var el = document.getElementById(href.slice(1));
+    if (el) {
+      e.preventDefault();
+      e.stopPropagation();
+      var top = el.getBoundingClientRect().top + window.pageYOffset - 60;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+      closeMob();
+    }
+  }
+});
+
+// Download tracking (non-blocking)
+function logDownload(p) {
+  try {
+    fetch('https://txschnjbpypyqvwehenh.supabase.co/rest/v1/download_events', {
+      method: 'POST',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c2NobmpicHlweXF2d2VoZW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwOTQsImV4cCI6MjA5MjIzMzA5NH0.jfQmKbG7jNsjVqjpKX4OHSsrpPKq01pabcjOSVE0DQo',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c2NobmpicHlweXF2d2VoZW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwOTQsImV4cCI6MjA5MjIzMzA5NH0.jfQmKbG7jNsjVqjpKX4OHSsrpPKq01pabcjOSVE0DQo',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ platform: p })
+    });
+  } catch(err) {}
+}
+</script>
+</body>
+</html>
